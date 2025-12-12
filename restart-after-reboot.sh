@@ -1,6 +1,9 @@
 #!/bin/bash
 # Quick restart script after Mac mini reboot
 
+# Add LaTeX to PATH for TikZ compilation
+export PATH="/Library/TeX/texbin:$PATH"
+
 echo "🔄 Restarting AIThink services after reboot..."
 echo ""
 

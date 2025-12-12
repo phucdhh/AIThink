@@ -99,6 +99,19 @@ const ChatInterface = () => {
       });
     });
 
+    // Handle TikZ compiled to SVG (replace full content)
+    newSocket.on('chat:tikz-compiled', (data) => {
+      setMessages(prev => {
+        const newMessages = [...prev];
+        const lastMessage = newMessages[newMessages.length - 1];
+        if (lastMessage && lastMessage.role === 'assistant') {
+          // Replace entire content with TikZ-compiled version
+          lastMessage.content = data.content;
+        }
+        return newMessages;
+      });
+    });
+
     newSocket.on('chat:end', () => {
       setIsLoading(false);
       setMessages(prev => {

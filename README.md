@@ -1,8 +1,18 @@
-# 🚀 AIThink: Trợ lý giải toán
+# 🚀 AIThink: Gia Sư Toán Học AI
 
-**AIThink** là một ứng dụng web dựa trên AI, được thiết kế để hỗ trợ người học giải quyết và hiểu các bài toán phức tạp. Ứng dụng này sử dụng sức mạnh suy luận của mô hình **Deepseek-R1:8b** được thử nghiệm chạy cục bộ thông qua Ollama trên Mac mini M2, cung cấp các giải thích chi tiết, từng bước, với vai trò là một trợ lý giải toán.
+**AIThink** là ứng dụng web AI tiên tiến, được thiết kế để trở thành người đồng hành đáng tin cậy cho học sinh, sinh viên và những ai đam mê toán học. Sử dụng công nghệ **Chain of Thought reasoning** từ mô hình **DeepSeek-R1:8b**, AIThink không chỉ đưa ra đáp án mà còn giải thích chi tiết từng bước suy luận, giúp người học hiểu sâu bản chất của vấn đề.
 
-* **Tên miền truy cập:** `aithink.truyenthong.edu.vn` (Triển khai thông qua Cloudflare Tunnel)
+Ứng dụng được triển khai trên Mac mini M2 với Ollama, kết hợp hệ thống queue thông minh để xử lý đồng thời tối đa 8 requests, đảm bảo trải nghiệm mượt mà ngay cả khi có nhiều người dùng cùng lúc. Hỗ trợ hiển thị công thức toán học với LaTeX (KaTeX), vẽ hình minh họa SVG tự động, và streaming real-time qua WebSocket để người dùng thấy AI "suy nghĩ" từng bước.
+
+🌐 **Demo**: [aithink.truyenthong.edu.vn](https://aithink.truyenthong.edu.vn) (Cloudflare Tunnel)
+
+**Điểm đặc biệt:**
+- 🧠 Giải thích logic toán học từng bước như một gia sư thật
+- ⚡ Real-time streaming với typing animation tự nhiên
+- 📊 Hệ thống queue thông minh, hiển thị trạng thái online/queued
+- 🎨 Tự động vẽ hình minh họa cho bài toán hình học
+- 🔒 GPU auto-abort khi user disconnect để tiết kiệm tài nguyên
+- 📱 Responsive design, hoạt động tốt trên mobile
 
 ---
 
@@ -19,7 +29,7 @@
 
 ---
 
-## 📁 Cấu trúc Thư mục Dự kiến
+## 📁 Cấu trúc Thư mục
 
 ```
 aithink/
