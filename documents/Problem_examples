@@ -1,0 +1,197 @@
+🔹 1. Bài toán đòi hỏi(common sense) rất đơn giản
+
+Ví dụ:
+
+“Con mèo có thể bỏ vào tủ lạnh không?”
+
+“Bạn có thể vừa chạy vừa ngủ không?”
+
+“Nếu tôi thả một quả banh xuống, nó sẽ bay lên hay rơi xuống?”
+
+Con người trả lời ngay nhờ kinh nghiệm sống.
+AI đôi khi trả lời sai do không “trải nghiệm thực tế” mà chỉ dự đoán từ dữ liệu văn bản.
+
+🔹 2. Bài toán suy luận không đầy đủ thông tin
+
+Ví dụ:
+
+“Lan đặt cuốn sách lên bàn. Sau đó cô ấy rời đi. Sách ở đâu?”
+
+“Tôi mở tủ lấy áo khoác. Tôi đang chuẩn bị làm gì?”
+
+Con người tự động suy luận từ ngữ cảnh.
+AI dễ bị hallucination hoặc suy luận sai nếu ngữ cảnh không rõ ràng.
+
+🔹 3. Bài toán hình dung không gian, định hướng
+
+“Nếu tôi quay trái 2 lần rồi phải 1 lần thì tôi đang quay hướng nào?”
+
+“Cảnh vật phía sau chiếc xe hơi sẽ trông như thế nào?”
+
+Nhiều AI thuần văn bản gặp khó khăn vì thiếu mô hình hoá không gian 3D.
+
+🔹 4. Bài toán logic hình học hoặc thao tác vật lý
+
+Xếp khối lập phương vào hộp khi hộp bị nghiêng.
+
+Tính điểm rơi của vật thể theo đường ném cong.
+
+Con người hình dung trực quan, còn AI ngôn ngữ thường chỉ suy luận bằng văn bản nên dễ sai.
+
+🔹 5. Bài toán với bẫy ngôn ngữ đơn giản
+
+Ví dụ:
+
+“Có 10 con chim trên cây, bắn 1 con rơi xuống. Còn lại bao nhiêu?”
+(Con người biết các con còn lại bay mất → 0.)
+
+AI đôi khi trả lời theo toán học thuần tuý (10 – 1 = 9).
+
+🔹 6. Nhận biết mỉa mai, ẩn dụ, chơi chữ
+
+Ví dụ:
+
+“Cô ấy đúng là thiên tài — lần này chỉ phá hỏng 3 máy tính thôi!”
+Con người hiểu đang mỉa mai.
+AI đôi khi diễn giải theo nghĩa đen.
+
+🔹 7. Bài toán có bước trung gian không rõ ràng
+
+Như:
+
+“Nếu tôi đổi thứ tự các bước, điều gì xảy ra?”
+
+“Khi nào việc A dẫn đến hậu quả B?”
+
+AI đôi khi bỏ qua bước then chốt, hoặc suy luận thiếu liên kết.
+
+🔹 8. Các câu đố mẹo cổ điển
+
+“Cái gì càng lau càng ướt?”
+
+“Bạn có thể nâng con voi bằng một tay không?”
+
+Con người nhận ra trò chơi chữ.
+AI đôi khi trả lời theo nghĩa logic thông thường.
+
+🔹 9. Bài toán chọn lọc chi tiết quan trọng
+
+Ví dụ đoạn văn dài chứa nhiều thông tin dư thừa.
+Con người biết tập trung vào điểm chính.
+AI đôi khi nhầm trọng tâm hoặc gán sai ý.
+
+Một số bài toán thuần tuý toán học:
+🔷 1. Bài toán về đếm hình – trực giác hình học
+
+AI rất dễ đếm sai do không hình dung được hình học.
+
+Ví dụ:
+
+Đếm số tam giác trong một hình gồm nhiều đoạn chéo.
+
+Đếm số hình vuông trong lưới 4×4.
+(Con người thường có phương pháp hệ thống, AI dễ bị bỏ sót hoặc trùng.)
+
+🔷 2. Bài toán điền số thiếu trong dãy có quy luật "mờ"
+
+Loại này con người giải bằng nhận dạng mô hình trực quan, AI dễ đoán sai.
+
+Ví dụ:
+
+1, 2, 4, 7, 11, 16, … (cộng dần 1,2,3,4,5…)
+
+3, 6, 18, 21, 63, 66, … (luân phiên ×3 và +3)
+
+AI thường nhận nhầm quy luật hoặc tạo quy luật mới không đúng.
+
+🔷 3. Bài toán so sánh phân số nhanh
+
+Con người dùng mẹo, AI đôi khi tính sai hoặc thừa bước.
+
+Ví dụ:
+
+Phân số nào lớn hơn: 
+17
+18
+18
+17
+	​
+
+ hay 
+21
+22
+22
+21
+	​
+
+?
+(Con người dùng mẹo “thiếu bao nhiêu để thành 1”.)
+
+🔷 4. Bài toán đố logic số học đơn giản nhưng có bẫy
+
+Ví dụ:
+
+Một người mua món hàng giá 97k, trả 100k, người bán trả lại 3k. Người bán có lãi/lỗ bao nhiêu?
+(Nhiều AI giải sai do cộng/trừ nhầm logic chi phí – thu.)
+
+Bài toán tuổi với dữ kiện lảng tránh (con người nhận ra mối quan hệ ngay, AI dễ rối).
+
+🔷 5. Bài toán đồng hồ (clock math)
+
+Loại này đòi hỏi trực giác về vị trí kim.
+
+Ví dụ:
+
+Lúc 2 giờ 20 phút, góc giữa hai kim là bao nhiêu?
+
+Khi nào hai kim trùng nhau trong 12 giờ?
+
+AI thường tính đúng công thức nhưng dễ sai chi tiết nhỏ.
+
+🔷 6. Bài toán suy luận số đơn giản nhưng dài
+
+Con người “nhìn ra ngay”, AI dễ sai do nhiều bước trung gian.
+
+Ví dụ:
+
+Nếu A gấp đôi B, B bằng 1/3 C, C gấp ba lần D, và tổng A+B+C+D = 40. Tìm A.
+(Nhiều AI bỏ sót biến hoặc suy luận sai tỉ lệ.)
+
+🔷 7. Bài toán “lấp chỗ trống” trong hình học cơ bản
+
+Con người dùng thuộc tính hình học trực giác, AI dễ sai.
+
+Ví dụ:
+
+Trong tam giác ABC, biết góc A = 50°, góc B = 60°. Tính góc C.
+
+Hình chữ nhật có chu vi 100 và chiều dài gấp 2 lần chiều rộng. Tính diện tích.
+
+Học sinh tính nhẩm, AI đôi khi trình bày dài dòng và sai bước.
+
+🔷 8. Bài toán cực trị đơn giản nhưng không theo công thức
+
+Ví dụ:
+
+Tổng 2 số là 10. Tích lớn nhất khi nào?
+(Con người nhớ mẹo: hai số bằng nhau → tích lớn nhất.)
+AI đôi khi dùng đạo hàm nhưng có thể suy luận sai nếu không “nhìn ra” bản chất.
+
+🔷 9. Bài toán suy luận về chia hết dựa trên tính chất
+
+Ví dụ:
+
+Số 10 chữ số, tất cả đều là 1, có chia hết cho 3 không?
+
+Tìm chữ số x để 34x2 chia hết cho 9.
+(Con người kiểm số chữ số/sum-of-digits, AI đôi lúc quên quy tắc.)
+
+🔷 10. Bài toán hoán vị đơn giản nhưng dễ nhầm
+
+Ví dụ:
+
+Có 3 người xếp vào 4 ghế, có bao nhiêu cách?
+
+Một từ 5 chữ cái trong đó có chữ lặp. Có bao nhiêu hoán vị khác nhau?
+
+AI thường dùng công thức nhưng sai trường hợp đặc biệt.
