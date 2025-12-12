@@ -1,12 +1,12 @@
-# 🚀 aithink: Gia Sư Toán Học Cá Nhân
+# 🚀 AIThink: Trợ lý giải toán
 
-**aithink** là một ứng dụng web dựa trên AI, được thiết kế để hỗ trợ người học giải quyết và hiểu các bài toán phức tạp. Ứng dụng này sử dụng sức mạnh suy luận của mô hình **Deepseek-R1:8b** chạy cục bộ thông qua Ollama trên Mac mini M2, cung cấp các giải thích chi tiết, từng bước, với vai trò là một gia sư cá nhân.
+**AIThink** là một ứng dụng web dựa trên AI, được thiết kế để hỗ trợ người học giải quyết và hiểu các bài toán phức tạp. Ứng dụng này sử dụng sức mạnh suy luận của mô hình **Deepseek-R1:8b** được thử nghiệm chạy cục bộ thông qua Ollama trên Mac mini M2, cung cấp các giải thích chi tiết, từng bước, với vai trò là một trợ lý giải toán.
 
 * **Tên miền truy cập:** `aithink.truyenthong.edu.vn` (Triển khai thông qua Cloudflare Tunnel)
 
 ---
 
-## 🛠️ Ngăn xếp Công nghệ (Technology Stack)
+## 🛠️ Công nghệ
 
 | Thành phần | Công nghệ | Mục đích |
 | :--- | :--- | :--- |
@@ -77,12 +77,12 @@ aithink/
     ```bash
     npm install express axios ioredis # (ioredis cho hàng đợi)
     ```
-2.  **Định hình vai trò Gia sư (`backend/src/services/promptTemplates/system_tutor_role.txt`):**
+2.  **Định hình vai trò trợ lý (`backend/src/services/promptTemplates/system_tutor_role.txt`):**
 
     File này là cốt lõi để đảm bảo AI hoạt động như một gia sư chuyên nghiệp.
 
     ```text
-    Bạn là một gia sư toán học chuyên nghiệp và kiên nhẫn. Nhiệm vụ của bạn là hỗ trợ người học bằng cách cung cấp lời giải chi tiết theo từng bước logic.
+    Bạn là một trợ lý toán học chuyên nghiệp và kiên nhẫn. Nhiệm vụ của bạn là hỗ trợ người học bằng cách cung cấp lời giải chi tiết theo từng bước logic.
 
     Hướng dẫn chính:
     1. Trả lời luôn ở định dạng Markdown.
@@ -186,32 +186,19 @@ aithink/
 
 ## 📊 Lộ trình Phát triển
 
-### Phase 1: MVP (Tuần 1-2)
+### Phase 1: MVP
 - [ ] Thiết lập Ollama + Deepseek-R1
 - [ ] Xây dựng Backend API (chat endpoint + queue system)
 - [ ] Xây dựng Frontend (chat UI + KaTeX rendering)
 - [ ] Triển khai Cloudflare Tunnel
 
-### Phase 2: Tối ưu hóa (Tuần 3-4)
+### Phase 2: Tối ưu hóa
 - [ ] Thêm xác thực người dùng
 - [ ] Implement rate limiting & input validation
 - [ ] Thêm monitoring & logging
 - [ ] Test performance dưới tải cao
 
-### Phase 3: Mở rộng (Tuần 5+)
-- [ ] Hỗ trợ nhiều chủ đề (không chỉ toán học)
+### Phase 3: Mở rộng
 - [ ] Lưu lịch sử chat cho người dùng
 - [ ] Thêm các mô hình AI khác
-
----
-
-## ✅ Kết Luận
-
-**Dự án này CÓ KHẢ THI** với các điều kiện sau:
-1. Mac mini M2 của bạn có đủ tài nguyên (≥16GB RAM)
-2. Bạn có kinh nghiệm với Node.js, React/Vue, và DevOps cơ bản
-3. Bạn chuẩn bị xử lý các vấn đề về hiệu suất và bảo mật trước khi đưa vào production
-
-Đây là một ý tưởng **thực tế, có giá trị**, và **khả thi để triển khai trong 2-4 tuần**.
-
 ---
