@@ -10,30 +10,67 @@ class OllamaService {
   constructor() {
     this.apiUrl = process.env.OLLAMA_API_URL || 'http://127.0.0.1:11434';
     this.model = process.env.OLLAMA_MODEL || 'deepseek-r1:8b';
-    this.systemPrompt = null;
+    this.commonPrompt = null;
+    this.tikzPrompt = null;
   }
 
   async initialize() {
     try {
-      const promptPath = join(__dirname, 'promptTemplates', 'system_tutor_role.txt');
-      this.systemPrompt = await fs.readFile(promptPath, 'utf-8');
-      console.log('✅ System prompt loaded successfully');
+      const commonPath = join(__dirname, 'promptTemplates', 'common-prompt.txt');
+      const tikzPath = join(__dirname, 'promptTemplates', 'tikz-prompt.txt');
+      
+      this.commonPrompt = await fs.readFile(commonPath, 'utf-8');
+      this.tikzPrompt = await fs.readFile(tikzPath, 'utf-8');
+      
+      console.log('✅ System prompts loaded successfully');
     } catch (error) {
-      console.error('❌ Failed to load system prompt:', error.message);
-      this.systemPrompt = 'Bạn là một gia sư toán học chuyên nghiệp.';
+      console.error('❌ Failed to load system prompts:', error.message);
+      this.commonPrompt = 'Bạn là một trợ lý toán học chuyên nghiệp.';
+      this.tikzPrompt = '';
     }
   }
 
-  async chat(userMessage, onStream, abortSignal) {
+  // Detect if user message needs TikZ (geometry, graphs, tables)
+  needsTikz(message) {
+    const tikzKeywords = [
+      'hình', 'vẽ', 'đồ thị', 'biểu đồ', 'đường', 'góc', 'tam giác', 'tứ giác', 
+      'đường tròn', 'elip', 'parabol', 'hyperbol', 'đa giác', 'trục tọa độ',
+      'bảng biến thiên', 'bảng xét dấu', 'minh họa', 'mô tả hình',
+      'geometry', 'graph', 'plot', 'draw', 'diagram', 'table', 'chart'
+    ];
+    
+    const lowerMessage = message.toLowerCase();
+    return tikzKeywords.some(keyword => lowerMessage.includes(keyword));
+  }
+
+  async chat(userMessage, onStream, abortSignal, selectedModel = null, apiKey = null) {
+    const modelToUse = selectedModel || this.model;
+    
+    // Cloud models are called through local Ollama (after ollama pull)
+    // No need for separate API endpoint or authentication
+    if (modelToUse.includes(':cloud')) {
+      console.log('☁️ Using cloud model via local Ollama');
+    }
+    
+    // Build system prompt: common + tikz (if needed)
+    const useTikz = this.needsTikz(userMessage);
+    const systemPrompt = useTikz 
+      ? `${this.commonPrompt}\n\n${this.tikzPrompt}`
+      : this.commonPrompt;
+    
+    if (useTikz) {
+      console.log('🎨 TikZ prompt added for visualization');
+    }
+    
     try {
       const response = await axios.post(
         `${this.apiUrl}/api/chat`,
         {
-          model: this.model,
+          model: modelToUse,
           messages: [
             {
               role: 'system',
-              content: this.systemPrompt
+              content: systemPrompt
             },
             {
               role: 'user',
@@ -114,7 +151,7 @@ class OllamaService {
         throw new Error('Request aborted by user');
       }
       console.error('❌ Ollama API error:', error.message);
-      throw new Error('Failed to communicate with Ollama');
+      throw new Error('Failed to communicate with AI');
     }
   }
 

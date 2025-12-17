@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { InlineMath, BlockMath } from 'react-katex';
 import DOMPurify from 'dompurify';
+import ZoomableSVG from './ZoomableSVG';
 import 'katex/dist/katex.min.css';
 
-const StreamingMathRenderer = ({ content, isStreaming }) => {
+const StreamingMathRenderer = ({ content, isStreaming, tikzCode = null }) => {
   const [parsedElements, setParsedElements] = useState([]);
+  const [copyMessage, setCopyMessage] = useState('');
   const previousContentRef = useRef('');
 
   useEffect(() => {
@@ -54,8 +56,8 @@ const StreamingMathRenderer = ({ content, isStreaming }) => {
     // console.log('Buffer contains ```svg:', buffer.includes('```svg'));
     
     while ((svgMatch = svgPattern.exec(buffer)) !== null) {
-      console.log('SVG match found! Captured length:', svgMatch[1].length);
-      console.log('SVG captured content:', svgMatch[1]);
+      // console.log('SVG match found! Captured length:', svgMatch[1].length);
+      // console.log('SVG captured content:', svgMatch[1]);
       if (svgMatch.index > lastSvgIndex) {
         let beforeContent = buffer.slice(lastSvgIndex, svgMatch.index);
         
@@ -98,31 +100,12 @@ const StreamingMathRenderer = ({ content, isStreaming }) => {
     // Process each SVG part
     svgParts.forEach((svgPart, svgIdx) => {
       if (svgPart.type === 'svg') {
-        // Render SVG diagram
+        // Render SVG diagram with zoom controls
         const sanitizedSvg = sanitizeSVG(svgPart.content);
         if (sanitizedSvg) {
           elements.push(
-            <div key={`svg-${key++}`} className="svg-diagram-container" style={{
-              margin: '20px 0',
-              display: 'flex',
-              justifyContent: 'center'
-            }}>
-              <div 
-                className="svg-diagram"
-                style={{
-                  maxWidth: '100%',
-                  width: '100%',
-                  border: '1px solid #e0e0e0',
-                  borderRadius: '8px',
-                  padding: '15px',
-                  backgroundColor: 'white',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  zIndex: 1
-                }}
-                dangerouslySetInnerHTML={{ __html: sanitizedSvg }}
-              />
+            <div key={`svg-${key++}`} style={{ margin: '20px 0' }}>
+              <ZoomableSVG svgContent={sanitizedSvg} />
             </div>
           );
         } else {
@@ -232,14 +215,62 @@ const StreamingMathRenderer = ({ content, isStreaming }) => {
     try {
       let processedSvg = svgCode.trim();
       
-      // If doesn't start with <svg, wrap it with default SVG tag
-      if (!processedSvg.startsWith('<svg')) {
+      // Check if SVG tag exists anywhere in the content (not just at start)
+      const hasSvgTag = processedSvg.includes('<svg');
+      
+      // Only wrap if there's no <svg tag at all
+      if (!hasSvgTag) {
         console.log('SVG missing opening tag, wrapping content...');
         processedSvg = `<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">\n${processedSvg}\n</svg>`;
+      } else {
+        // Remove fixed width/height attributes to allow responsive scaling
+        processedSvg = processedSvg.replace(/\s+width=['"][^'"]*['"]/g, '');
+        processedSvg = processedSvg.replace(/\s+height=['"][^'"]*['"]/g, '');
+        
+        // Fix viewBox for dvisvgm output - normalize to start from 0,0
+        const viewBoxMatch = processedSvg.match(/viewBox=['"]([^'"]+)['"]/);
+        if (viewBoxMatch) {
+          const [minX, minY, width, height] = viewBoxMatch[1].split(/\s+/).map(Number);
+          
+          // Only normalize if viewBox doesn't already start at (0,0)
+          // Backend normalization should be preserved
+          if (minX !== 0 || minY !== 0) {
+            // Normalize viewBox to start from 0,0
+            processedSvg = processedSvg.replace(
+              viewBoxMatch[0],
+              `viewBox="0 0 ${width} ${height}"`
+            );
+            console.log(`📐 Frontend normalizing viewBox from (${minX},${minY},${width},${height}) to (0,0,${width},${height})`);
+            
+            // Shift all content by translating the main group or create wrapper group
+            if (processedSvg.includes('<g id=')) {
+              // Only add/update transform if there isn't one already from backend
+              const hasTransform = /<g\s+id=['"]page1['"]\s+transform=/.test(processedSvg);
+              if (!hasTransform) {
+                processedSvg = processedSvg.replace(
+                  /<g id=['"]page1['"]/,
+                  `<g id="page1" transform="translate(${-minX}, ${-minY})"`
+                );
+              }
+            } else {
+              // If no group exists, wrap everything between svg tags with a transform group
+              processedSvg = processedSvg.replace(
+                /(<svg[^>]*>)/,
+                `$1\n<g transform="translate(${-minX}, ${-minY})">`
+              );
+              processedSvg = processedSvg.replace(
+                /<\/svg>/,
+                `</g>\n</svg>`
+              );
+            }
+          } else {
+            console.log(`📐 ViewBox already normalized at (0,0), preserving backend transform`);
+          }
+        }
       }
       
-      // If doesn't end with </svg>, add closing tag
-      if (!processedSvg.trim().endsWith('</svg>')) {
+      // If doesn't end with </svg>, add closing tag (only if we wrapped it)
+      if (!hasSvgTag && !processedSvg.trim().endsWith('</svg>')) {
         console.log('SVG missing closing tag, adding...');
         processedSvg = processedSvg + '\n</svg>';
       }
@@ -247,8 +278,8 @@ const StreamingMathRenderer = ({ content, isStreaming }) => {
       // Configure DOMPurify to allow SVG elements
       const config = {
         USE_PROFILES: { svg: true, svgFilters: true },
-        ADD_TAGS: ['svg', 'circle', 'ellipse', 'line', 'path', 'polygon', 'polyline', 'rect', 'text', 'tspan', 'g', 'defs', 'clipPath', 'mask', 'marker'],
-        ADD_ATTR: ['viewBox', 'xmlns', 'fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-linecap', 'font-size', 'font-family', 'text-anchor', 'dominant-baseline', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'width', 'height', 'd', 'points', 'transform', 'opacity', 'marker-end', 'marker-start'],
+        ADD_TAGS: ['svg', 'circle', 'ellipse', 'line', 'path', 'polygon', 'polyline', 'rect', 'text', 'tspan', 'g', 'defs', 'clipPath', 'mask', 'marker', 'use'],
+        ADD_ATTR: ['viewBox', 'xmlns', 'xmlns:xlink', 'xlink:href', 'fill', 'stroke', 'stroke-width', 'stroke-dasharray', 'stroke-linecap', 'font-size', 'font-family', 'text-anchor', 'dominant-baseline', 'x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 'width', 'height', 'd', 'points', 'transform', 'opacity', 'marker-end', 'marker-start', 'id', 'version'],
         FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'link'],
         FORBID_ATTR: ['onclick', 'onload', 'onerror', 'onmouseover', 'onmouseout', 'onfocus', 'onblur']
       };
@@ -262,7 +293,6 @@ const StreamingMathRenderer = ({ content, isStreaming }) => {
       }
       
       console.log('SVG sanitized successfully, length:', sanitized.length);
-      console.log('Sanitized SVG content:', sanitized);
       return sanitized;
     } catch (error) {
       console.error('SVG sanitization error:', error);
@@ -489,24 +519,109 @@ const StreamingMathRenderer = ({ content, isStreaming }) => {
     return elements.length > 0 ? elements : text;
   };
 
+  const copyTikzCode = (fullVersion = false) => {
+    if (!tikzCode) return;
+    
+    let codeToCopy = tikzCode;
+    
+    if (fullVersion) {
+      // Full LaTeX document
+      codeToCopy = `\\documentclass[border=2mm]{standalone}
+\\usepackage{tikz}
+\\usetikzlibrary{calc,patterns,angles,quotes}
+\\begin{document}
+${tikzCode}
+\\end{document}`;
+    }
+    
+    navigator.clipboard.writeText(codeToCopy).then(() => {
+      setCopyMessage(fullVersion ? 'Đã copy full code!' : 'Đã copy TikZ code!');
+      setTimeout(() => setCopyMessage(''), 2000);
+    });
+  };
+
   return (
-    <div className="streaming-math-content" style={{ 
-      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      fontSize: '15px',
-      lineHeight: '1.7',
-      color: '#2d3748'
-    }}>
-      {parsedElements}
-      {isStreaming && (
-        <span className="streaming-cursor" style={{
-          display: 'inline-block',
-          width: '2px',
-          height: '18px',
-          backgroundColor: '#667eea',
-          marginLeft: '2px',
-          verticalAlign: 'middle'
-        }}></span>
+    <div>
+      <div className="streaming-math-content" style={{ 
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontSize: '15px',
+        lineHeight: '1.7',
+        color: '#2d3748'
+      }}>
+        {parsedElements}
+        {isStreaming && (
+          <span className="streaming-cursor" style={{
+            display: 'inline-block',
+            width: '2px',
+            height: '18px',
+            backgroundColor: '#667eea',
+            marginLeft: '2px',
+            verticalAlign: 'middle'
+          }}></span>
+        )}
+      </div>
+      
+      {tikzCode && !isStreaming && (
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          marginTop: '12px',
+          paddingTop: '12px',
+          borderTop: '1px solid #e5e7eb'
+        }}>
+          <button
+            onClick={() => copyTikzCode(false)}
+            style={{
+              padding: '6px 12px',
+              fontSize: '13px',
+              backgroundColor: '#667eea',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              fontWeight: '500'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#5568d3'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#667eea'}
+          >
+            📋 TikZ code
+          </button>
+          
+          <button
+            onClick={() => copyTikzCode(true)}
+            style={{
+              padding: '6px 12px',
+              fontSize: '13px',
+              backgroundColor: '#764ba2',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              fontWeight: '500'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = '#5f3a82'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = '#764ba2'}
+          >
+            📄 Full LaTeX code
+          </button>
+          
+          {copyMessage && (
+            <span style={{
+              marginLeft: '8px',
+              color: '#10b981',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              fontWeight: '500'
+            }}>
+              ✓ {copyMessage}
+            </span>
+          )}
+        </div>
       )}
+      
       <style>{`
         @keyframes blink {
           0%, 50% { opacity: 1; }

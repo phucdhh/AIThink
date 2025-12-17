@@ -1,0 +1,307 @@
+import { exec } from 'child_process';
+import { writeFile, unlink, readFile } from 'fs/promises';
+import { promisify } from 'util';
+import path from 'path';
+import os from 'os';
+import crypto from 'crypto';
+
+const execAsync = promisify(exec);
+
+class TikzService {
+  constructor() {
+    this.tmpDir = os.tmpdir();
+  }
+
+  /**
+   * Compile TikZ code to SVG
+   * @param {string} tikzCode - TikZ/LaTeX code
+   * @returns {Promise<string>} - SVG content
+   */
+  async compileToSVG(tikzCode) {
+    const jobId = crypto.randomBytes(8).toString('hex');
+    const basePath = path.join(this.tmpDir, `tikz_${jobId}`);
+    const texFile = `${basePath}.tex`;
+    const dviFile = `${basePath}.dvi`;
+    const svgFile = `${basePath}.svg`;
+
+    try {
+      // Create LaTeX document with TikZ
+      const latexDoc = this.wrapTikzCode(tikzCode);
+      await writeFile(texFile, latexDoc);
+
+      // Compile LaTeX → DVI (use absolute path)
+      await execAsync(`/Library/TeX/texbin/latex -interaction=nonstopmode -output-directory=${this.tmpDir} ${texFile}`, {
+        timeout: 10000
+      });
+
+      // Convert DVI → SVG using dvisvgm (use absolute path)
+      // Specify Ghostscript library explicitly for PostScript processing
+      const gsLib = '/opt/homebrew/Cellar/ghostscript/10.06.0/lib/libgs.dylib';
+      const dvisvgmEnv = {
+        ...process.env,
+        PATH: `/opt/homebrew/bin:/Library/TeX/texbin:/usr/local/bin:/usr/bin:/bin`
+      };
+      
+      // Use --exact-bbox for better bounding box calculation
+      await execAsync(`/Library/TeX/texbin/dvisvgm --no-fonts --exact-bbox --libgs=${gsLib} --output=${svgFile} ${dviFile}`, {
+        timeout: 10000,
+        env: dvisvgmEnv
+      });
+
+      // Read SVG content and normalize viewBox
+      let svgContent = await readFile(svgFile, 'utf-8');
+      svgContent = this.normalizeSVGViewBox(svgContent);
+
+      // Cleanup temp files
+      await this.cleanup(basePath);
+
+      return svgContent;
+    } catch (error) {
+      // Cleanup on error
+      await this.cleanup(basePath);
+      throw new Error(`TikZ compilation failed: ${error.message}`);
+    }
+  }
+
+  /**
+   * Wrap TikZ code in LaTeX document
+   * Auto-wraps with tikzpicture environment if missing
+   */
+  wrapTikzCode(tikzCode) {
+    // Sanitize code: remove code fences and ensure tikzpicture environment is balanced
+    const sanitize = (code) => {
+      let s = String(code || '');
+      // Remove leading/trailing code fences ``` and optional language marker
+      s = s.replace(/^\s*```\s*\w*\s*\n?/i, '');
+      s = s.replace(/\n?\s*```\s*$/i, '');
+
+      // Trim whitespace
+      s = s.trim();
+
+      const hasBegin = /\\begin\{tikzpicture\}/i.test(s);
+      const hasEnd = /\\end\{tikzpicture\}/i.test(s);
+
+      if (!hasBegin && hasEnd) {
+        s = `\\begin{tikzpicture}\n${s}`;
+      } else if (hasBegin && !hasEnd) {
+        s = `${s}\n\\end{tikzpicture}`;
+      } else if (!hasBegin && !hasEnd) {
+        s = `\\begin{tikzpicture}\n${s}\n\\end{tikzpicture}`;
+      }
+
+      return s;
+    };
+
+    const finalCode = sanitize(tikzCode);
+
+    return `\\documentclass[tikz,border=10pt]{standalone}
+\\usepackage{tikz}
+\\usetikzlibrary{arrows.meta,calc,patterns,angles,quotes}
+\\usepackage{amsmath,amssymb}
+
+\\begin{document}
+${finalCode}
+\\end{document}`;
+  }
+
+  /**
+   * Cleanup temporary files
+   */
+  async cleanup(basePath) {
+    const extensions = ['.tex', '.dvi', '.svg', '.aux', '.log'];
+    const cleanupPromises = extensions.map(ext =>
+      unlink(`${basePath}${ext}`).catch(() => {})
+    );
+    await Promise.all(cleanupPromises);
+  }
+
+  /**
+   * Normalize SVG viewBox to start at (0, 0)
+   * This fixes rendering issues where negative viewBox coordinates cause blank SVGs
+   * @param {string} svgContent - Raw SVG content
+   * @returns {string} - Normalized SVG content
+   */
+  normalizeSVGViewBox(svgContent) {
+    // Match viewBox attribute
+    const viewBoxMatch = svgContent.match(/viewBox=['"]([^'"]+)['"]/);
+    if (!viewBoxMatch) return svgContent;
+
+    const viewBoxValues = viewBoxMatch[1].split(/\s+/).map(parseFloat);
+    if (viewBoxValues.length !== 4) return svgContent;
+
+    const [minX, minY, viewWidth, viewHeight] = viewBoxValues;
+    
+    // Calculate actual bounding box
+    // ViewBox format is: minX minY width height
+    // So max coordinates are: minX + viewWidth, minY + viewHeight
+    const maxX = minX + viewWidth;
+    const maxY = minY + viewHeight;
+    
+    // New viewBox dimensions (actual content size)
+    const actualWidth = maxX - minX;
+    const actualHeight = maxY - minY;
+    
+    // Create normalized viewBox starting at (0, 0)
+    const normalizedViewBox = `0 0 ${actualWidth.toFixed(6)} ${actualHeight.toFixed(6)}`;
+    
+    // Replace viewBox
+    svgContent = svgContent.replace(
+      /viewBox=['"][^'"]+['"]/,
+      `viewBox="${normalizedViewBox}"`
+    );
+
+    // Update width and height attributes in <svg> tag only (not stroke-width etc)
+    svgContent = svgContent.replace(
+      /(<svg[^>]*\s)width=['"'][^'"]+['"]([^>]*>)/,
+      `$1width="${actualWidth.toFixed(2)}pt"$2`
+    );
+    svgContent = svgContent.replace(
+      /(<svg[^>]*\s)height=['"'][^'"]+['"]([^>]*>)/,
+      `$1height="${actualHeight.toFixed(2)}pt"$2`
+    );
+
+    // Always parse actual content coordinates to find true bounds
+    let minXContent = Infinity;
+    let minYContent = Infinity;
+
+    // Find <use x= y=> positions
+    const useRe = /<use[^>]*\s+x=['"]([^'"\s]+)['"][^>]*\s+y=['"]([^'"\s]+)['"][^>]*>/g;
+    let m;
+    while ((m = useRe.exec(svgContent)) !== null) {
+      const ux = parseFloat(m[1]);
+      const uy = parseFloat(m[2]);
+      if (!Number.isNaN(ux)) minXContent = Math.min(minXContent, ux);
+      if (!Number.isNaN(uy)) minYContent = Math.min(minYContent, uy);
+    }
+
+    // Parse path d attributes to find all coordinate extrema
+    const pathRe = /<path[^>]*\s+d=['"]([^'"]+)['"][^>]*>/g;
+    while ((m = pathRe.exec(svgContent)) !== null) {
+      const d = m[1];
+      // Extract all numbers from path
+      const nums = Array.from(d.matchAll(/-?\d+(?:\.\d+)?/g)).map(x => parseFloat(x[0]));
+      
+      // Check all numbers as potential coordinates (handles M, L, H, V, etc.)
+      for (const num of nums) {
+        if (!Number.isNaN(num)) {
+          minXContent = Math.min(minXContent, num);
+          minYContent = Math.min(minYContent, num);
+        }
+      }
+    }
+
+    // Determine true minimum coordinates (from viewBox or content, whichever is smaller)
+    const trueMinX = minXContent !== Infinity ? Math.min(minX, minXContent) : minX;
+    const trueMinY = minYContent !== Infinity ? Math.min(minY, minYContent) : minY;
+
+    // Calculate shift needed to bring content to origin
+    const shiftX = -trueMinX;
+    const shiftY = -trueMinY;
+
+    // If we need to shift beyond viewBox bounds, expand viewBox
+    if (trueMinX < minX || trueMinY < minY) {
+      const newWidth = actualWidth + (minX - trueMinX);
+      const newHeight = actualHeight + (minY - trueMinY);
+
+      svgContent = svgContent.replace(/viewBox=['"][^'"]+['\"]/, `viewBox="0 0 ${newWidth.toFixed(6)} ${newHeight.toFixed(6)}"`);
+      svgContent = svgContent.replace(/(<svg[^>]*\s)width=['"][^'"]+['"]/,`$1width="${newWidth.toFixed(2)}pt"`);
+      svgContent = svgContent.replace(/(<svg[^>]*\s)height=['"][^'"]+['"]/,`$1height="${newHeight.toFixed(2)}pt"`);
+
+      console.log(`📐 Normalized SVG (content negative): shift [${(-trueMinX).toFixed(2)}, ${(-trueMinY).toFixed(2)}], new viewBox [0,0,${newWidth.toFixed(2)},${newHeight.toFixed(2)}]`);
+    } else {
+      console.log(`📐 Normalized SVG: viewBox [${minX}, ${minY}, ${viewWidth}, ${viewHeight}] → [0, 0, ${actualWidth.toFixed(2)}, ${actualHeight.toFixed(2)}], transform: translate(${shiftX}, ${shiftY})`);
+    }
+
+    // Add or update transform on <g id='page1'> element
+    let transform = `translate(${shiftX.toFixed(6)}, ${shiftY.toFixed(6)})`;
+
+    // Handle existing or new transform - simplified logic since we always need shift now
+    if (true) {
+      const shiftX = -trueMinX;
+      const shiftY = -trueMinY;
+
+      if (shiftX > 0 || shiftY > 0) {
+        const newWidth = actualWidth + shiftX;
+        const newHeight = actualHeight + shiftY;
+
+        svgContent = svgContent.replace(/viewBox=['"][^'"]+['"]/, `viewBox="0 0 ${newWidth.toFixed(6)} ${newHeight.toFixed(6)}"`);
+        svgContent = svgContent.replace(/(<svg[^>]*\s)width=['"'][^'"]+['"]/, `$1width="${newWidth.toFixed(2)}pt"`);
+        svgContent = svgContent.replace(/(<svg[^>]*\s)height=['"'][^'"]+['"]/, `$1height="${newHeight.toFixed(2)}pt"`); 
+
+        transform = `translate(${shiftX.toFixed(6)}, ${shiftY.toFixed(6)})`;
+
+        const gMatch = svgContent.match(/<g\s+id=['"]page1['"](?:\s+transform=['"]([^'"]*)['"])?/);
+        if (gMatch) {
+          const existing = gMatch[1] ? gMatch[1].trim() : '';
+          const combined = existing ? `${transform} ${existing}` : transform;
+          if (gMatch[1]) {
+            svgContent = svgContent.replace(/<g\s+id=['"]page1['"]\s+transform=['"][^'"]*['"]/, `<g id='page1' transform='${combined}'`);
+          } else {
+            svgContent = svgContent.replace(/<g\s+id=['"]page1['"]/, `<g id='page1' transform='${combined}'`);
+          }
+        } else {
+          svgContent = svgContent.replace(/<g\s+id=['"]page1['"]/, `<g id='page1' transform='${transform}'`);
+        }
+
+        console.log(`📐 Normalized SVG (content negative): shift [${shiftX.toFixed(2)}, ${shiftY.toFixed(2)}], new viewBox [0,0,${newWidth.toFixed(2)},${newHeight.toFixed(2)}]`);
+        return svgContent;
+      }
+    }
+
+    // Fallback: add/replace transform using computed -minX,-minY
+    const gHasTransform = /<g\s+id=['"]page1['"]\s+transform=/.test(svgContent);
+    if (gHasTransform) {
+      svgContent = svgContent.replace(/<g\s+id=['"]page1['"]\s+transform=['"][^'"]*['"]/, `<g id='page1' transform='${transform}'`);
+    } else {
+      svgContent = svgContent.replace(/<g\s+id=['"]page1['"]/, `<g id='page1' transform='${transform}'`);
+    }
+
+    console.log(`📐 Normalized SVG: viewBox [${minX}, ${minY}, ${viewWidth}, ${viewHeight}] → [0, 0, ${actualWidth.toFixed(2)}, ${actualHeight.toFixed(2)}], transform: ${transform}`);
+    return svgContent;
+  }
+
+  /**
+   * Extract TikZ blocks from markdown content
+   * @param {string} content - Markdown content
+   * @returns {Array<{original: string, tikz: string}>}
+   */
+  extractTikzBlocks(content) {
+    // Match multiple patterns:
+    // 1. ```tikz...``` (case insensitive)
+    // 2. Standalone \begin{tikzpicture}...\end{tikzpicture}
+    const blocks = [];
+    
+    // Pattern 1: Code blocks with tikz marker (case insensitive, handles incomplete blocks)
+    const codeBlockRegex = /```\s*tikz\s*([\s\S]*?)(?:```|$)/gi;
+    let match;
+    
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+      const tikzCode = match[1].trim();
+      if (tikzCode && tikzCode.length > 0) {
+        blocks.push({
+          original: match[0],
+          tikz: tikzCode
+        });
+      }
+    }
+    
+    // Pattern 2: Standalone tikzpicture environments (not in code blocks)
+    // Remove already-matched code blocks to avoid double-processing
+    let contentWithoutCodeBlocks = content.replace(/```\s*tikz[\s\S]*?```/gi, '');
+    
+    const standaloneRegex = /\\begin\{tikzpicture\}[\s\S]*?\\end\{tikzpicture\}/g;
+    while ((match = standaloneRegex.exec(contentWithoutCodeBlocks)) !== null) {
+      const tikzCode = match[0];
+      if (tikzCode && tikzCode.length > 0) {
+        blocks.push({
+          original: match[0],
+          tikz: tikzCode
+        });
+      }
+    }
+
+    return blocks;
+  }
+}
+
+export default new TikzService();

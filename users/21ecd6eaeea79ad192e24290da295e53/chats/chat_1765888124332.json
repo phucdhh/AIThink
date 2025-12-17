@@ -1,0 +1,19 @@
+{
+  "chatId": "chat_1765888124332",
+  "title": " Số tự nhiên nào khi đem nhân với 3 và trừ đi 2 th",
+  "messages": [
+    {
+      "role": "user",
+      "content": " Số tự nhiên nào khi đem nhân với 3 và trừ đi 2 thì sẽ cho ra đáp án là số đảo ngược của chính nó.\nHãy giải bài toán này và giải thích rõ từng bước, đặc biệt là lý do áp dụng công thức.",
+      "timestamp": "2025-12-16T12:28:44.334Z"
+    },
+    {
+      "role": "queued",
+      "content": "",
+      "isStreaming": true,
+      "timestamp": "2025-12-16T12:28:46.372Z"
+    }
+  ],
+  "createdAt": "2025-12-16T12:29:48.938Z",
+  "updatedAt": "2025-12-16T12:29:48.938Z"
+}

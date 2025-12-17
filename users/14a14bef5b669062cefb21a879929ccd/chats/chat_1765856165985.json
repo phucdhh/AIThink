@@ -1,0 +1,19 @@
+{
+  "chatId": "chat_1765856165985",
+  "title": "Hell ",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hell ",
+      "timestamp": "2025-12-16T03:36:05.986Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Hmm, người dùng gửi một tin nhắn rất ngắn và kỳ lạ chỉ viết \"Hell\". Có lẽ đây là một cách viết tắt hoặc viết sai chính tả. Có thể họ muốn nói đến từ \"Hell\" trong toán học, nhưng trong ngữ cảnh toán học, từ này thường không phổ biến.\n\nMình nên",
+      "isStreaming": true,
+      "timestamp": "2025-12-16T03:43:29.386Z"
+    }
+  ],
+  "createdAt": "2025-12-16T03:43:29.892Z",
+  "updatedAt": "2025-12-16T03:43:29.892Z"
+}

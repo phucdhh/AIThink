@@ -1,0 +1,25 @@
+{
+  "chatId": "chat_1765809339026",
+  "title": "Tính 2-(-3)",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Tính 2-(-3)",
+      "timestamp": "2025-12-15T14:35:39.028Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Hmm, người dùng yêu cầu tính 2 - (-3). Đây là một bài toán đơn giản về phép trừ số nguyên, nhưng có vẻ họ đang gặp vấn đề với dấu âm. \n\nMình nên giải thích rõ ràng từng bước vì có thể người dùng đang học sinh cấp 2 và đang bỡ ngỡ với quy tắc dấu. Cần nhấn mạnh rằng trừ một số âm tương đương với cộng số dương. \n\nÀ, đây là cơ hội tốt để minh họa bằng hình ảnh trực quan. Có thể dùng biểu tượng nhiệt độ vì nó dễ hình dung - khi nhiệt độ giảm (cộng âm) hoặc tăng (cộng dương). \n\nMình cũng nên kiểm tra lại đáp án để đảm bảo chính xác. 2 - (-3) thực sự bằng 5, đúng như mình tính. \n\nCần trình bày ngắn gọn nhưng đủ ý, chỉ cần nói rõ hai bước chính: quy tắc dấu và phép tính đơn giản. Thêm phần giải thích trực quan để người dùng hiểu bản chất vấn đề.\n",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T14:36:11.164Z"
+    },
+    {
+      "role": "assistant",
+      "content": "**THINKING:**\n- Dữ kiện: Phép tính 2 - (-3)\n- Quy tắc: Trừ một số âm tương đương với cộng số dương đó.\n- Áp dụng: 2 - (-3) = 2 + 3 = 5\n\n**ANSWER:**\n**Kết quả:**  \n2 - (-3) = **5**  \n\n**Giải thích:**  \nTrong phép trừ hai số nguyên, khi gặp dấu trừ trước một số âm, ta chuyển thành dấu cộng và đổi dấu của số đó. Do đó:  \n2 - (-3) = 2 + 3 = 5  \n\n**Phần minh họa trực quan (nếu cần):**  \n*Chúng ta có thể hình dung bằng trục số: điểm 2, di chuyển sang phải 3 đơn vị (vì trừ (-3) tương đương cộng 3), kết quả là 5.*  \n\n**Kết luận:** Đáp án chính xác là **5**.",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T14:35:56.782Z"
+    }
+  ],
+  "createdAt": "2025-12-15T14:36:11.646Z",
+  "updatedAt": "2025-12-15T14:36:11.646Z"
+}

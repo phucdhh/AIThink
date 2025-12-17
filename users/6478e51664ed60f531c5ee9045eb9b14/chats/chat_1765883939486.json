@@ -1,0 +1,19 @@
+{
+  "chatId": "chat_1765883939486",
+  "title": "Vẽ tam giác đều ABC với đường tròn ngoại tiếp",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Vẽ tam giác đều ABC với đường tròn ngoại tiếp",
+      "timestamp": "2025-12-16T11:18:59.487Z"
+    },
+    {
+      "role": "thinking",
+      "content": "",
+      "isStreaming": true,
+      "timestamp": "2025-12-16T11:19:02.487Z"
+    }
+  ],
+  "createdAt": "2025-12-16T11:19:00.902Z",
+  "updatedAt": "2025-12-16T11:19:00.902Z"
+}

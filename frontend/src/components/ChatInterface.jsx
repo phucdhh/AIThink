@@ -1,36 +1,135 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import StreamingMathRenderer from './StreamingMathRenderer';
-import QueueStatus from './QueueStatus';
+import Sidebar from './Sidebar';
+import ChatMessage from './ChatMessage';
+import ChatFooter from './ChatFooter';
+import Dialog from './Dialog';
+import ModelSelector from './ModelSelector';
+import '../styles/ChatInterface.css';
 
 const ChatInterface = () => {
+  // User and auth state
+  const [user, setUser] = useState(null);
+  const [recentChats, setRecentChats] = useState([]);
+  const [currentChatId, setCurrentChatId] = useState(null);
+  
+  // Chat state
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [systemStatus, setSystemStatus] = useState(null); // { onlineUsers, queue }
+  const [systemStatus, setSystemStatus] = useState(null);
   const [socket, setSocket] = useState(null);
+  const [selectedModel, setSelectedModel] = useState('');
+  
+  // UI state
+  const [dialogType, setDialogType] = useState(null);
+  const [theme, setTheme] = useState('light');
+  const [thinkingMinimized, setThinkingMinimized] = useState({});
+  
   const messagesEndRef = useRef(null);
   const currentResponseRef = useRef('');
   const inputRef = useRef(null);
 
-  useEffect(() => {
-    // Connect to WebSocket - auto-detect based on hostname
-    let socketUrl;
+  // Get API base URL
+  const getApiUrl = () => {
     if (window.location.hostname === 'localhost') {
-      socketUrl = 'http://localhost:3000';
-    } else {
-      // For production, use same origin (Cloudflare will route to backend)
-      socketUrl = window.location.origin;
+      return 'http://localhost:3000';
     }
+    return window.location.origin;
+  };
+
+  // Initialize user on mount
+  useEffect(() => {
+    const initUser = async () => {
+      try {
+        const userId = localStorage.getItem('aithink-user-id');
+        const headers = userId ? { 'x-user-id': userId } : {};
+        
+        const response = await fetch(`${getApiUrl()}/api/auth/user`, { headers });
+        const userData = await response.json();
+        
+        setUser(userData);
+        localStorage.setItem('aithink-user-id', userData.userId);
+        
+        // Load chat history
+        loadChatHistory(userData.userId);
+        
+        // Apply saved theme
+        if (userData.theme) {
+          setTheme(userData.theme);
+          document.body.setAttribute('data-theme', userData.theme);
+        }
+      } catch (error) {
+        console.error('Error initializing user:', error);
+      }
+    };
+    
+    initUser();
+  }, []);
+
+  // Load chat history
+  const loadChatHistory = async (userId) => {
+    try {
+      const response = await fetch(`${getApiUrl()}/api/auth/chats`, {
+        headers: { 'x-user-id': userId }
+      });
+      const chats = await response.json();
+      setRecentChats(chats);
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+    }
+  };
+
+  // Save current chat
+  const saveCurrentChat = async () => {
+    if (!user || !currentChatId || messages.length === 0) return;
+    
+    try {
+      await fetch(`${getApiUrl()}/api/auth/chats`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-user-id': user.userId
+        },
+        body: JSON.stringify({
+          chatId: currentChatId,
+          messages: messages.map(msg => ({
+            ...msg,
+            timestamp: msg.timestamp || new Date().toISOString()
+          }))
+        })
+      });
+      
+      // Reload chat history
+      loadChatHistory(user.userId);
+    } catch (error) {
+      console.error('Error saving chat:', error);
+    }
+  };
+
+  // Auto-save chat when messages change
+  useEffect(() => {
+    if (messages.length > 0 && currentChatId) {
+      const timer = setTimeout(() => {
+        saveCurrentChat();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [messages, currentChatId]);
+
+  // WebSocket connection
+  useEffect(() => {
+    const socketUrl = getApiUrl();
     
     console.log('Attempting to connect to:', socketUrl);
     const newSocket = io(socketUrl, {
-      transports: ['polling'], // Force polling only (WebSocket not supported by Cloudflare Tunnel yet)
+      transports: ['polling'],
       path: '/socket.io/',
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,
-      upgrade: false // Disable auto-upgrade to websocket
+      upgrade: false
     });
     
     newSocket.on('connect', () => {
@@ -49,7 +148,6 @@ const ChatInterface = () => {
       console.log('🎬 Chat started - waiting for stream...');
       setIsLoading(true);
       currentResponseRef.current = '';
-      // Update queued message to thinking
       setMessages(prev => {
         const newMessages = [...prev];
         const lastMessage = newMessages[newMessages.length - 1];
@@ -61,37 +159,31 @@ const ChatInterface = () => {
       });
     });
 
-    // Handle thinking stream (Chain of Thought)
     newSocket.on('chat:thinking', (data) => {
       setMessages(prev => {
         const newMessages = [...prev];
         const lastMessage = newMessages[newMessages.length - 1];
-        
-        // Append to thinking bubble
         if (lastMessage && lastMessage.role === 'thinking') {
           lastMessage.content += data.content;
         }
-        
         return newMessages;
       });
     });
 
-    // Handle content stream (Answer)
     newSocket.on('chat:content', (data) => {
       setMessages(prev => {
         const newMessages = [...prev];
         const lastMessage = newMessages[newMessages.length - 1];
         
-        // If last is thinking and we get content, create answer bubble
         if (lastMessage && lastMessage.role === 'thinking') {
-          lastMessage.isStreaming = false; // Close thinking bubble
+          lastMessage.isStreaming = false;
           newMessages.push({
             role: 'assistant',
             content: data.content,
-            isStreaming: true
+            isStreaming: true,
+            timestamp: new Date().toISOString()
           });
         } else if (lastMessage && lastMessage.role === 'assistant') {
-          // Append to answer bubble
           lastMessage.content += data.content;
         }
         
@@ -99,14 +191,16 @@ const ChatInterface = () => {
       });
     });
 
-    // Handle TikZ compiled to SVG (replace full content)
     newSocket.on('chat:tikz-compiled', (data) => {
+      console.log('🎨 Received chat:tikz-compiled event', data.tikzCode ? 'with TikZ code' : '');
       setMessages(prev => {
         const newMessages = [...prev];
         const lastMessage = newMessages[newMessages.length - 1];
         if (lastMessage && lastMessage.role === 'assistant') {
-          // Replace entire content with TikZ-compiled version
           lastMessage.content = data.content;
+          if (data.tikzCode) {
+            lastMessage.tikzCode = data.tikzCode;
+          }
         }
         return newMessages;
       });
@@ -123,10 +217,7 @@ const ChatInterface = () => {
         return newMessages;
       });
       currentResponseRef.current = '';
-      // Focus input after completion
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
+      setTimeout(() => inputRef.current?.focus(), 100);
     });
 
     newSocket.on('chat:error', (data) => {
@@ -137,14 +228,13 @@ const ChatInterface = () => {
     setSocket(newSocket);
 
     return () => {
-      // Emit stop signal before disconnecting
       newSocket.emit('chat:stop');
       newSocket.close();
     };
   }, []);
 
+  // Auto-scroll
   useEffect(() => {
-    // Only scroll if user is near bottom (prevent jump when user is reading above)
     const container = messagesEndRef.current?.parentElement;
     if (container) {
       const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 100;
@@ -154,39 +244,99 @@ const ChatInterface = () => {
     }
   }, [messages]);
 
+  // Handle new chat
+  const handleNewChat = () => {
+    setCurrentChatId(`chat_${Date.now()}`);
+    setMessages([]);
+    inputRef.current?.focus();
+  };
+
+  // Handle select chat
+  const handleSelectChat = (chat) => {
+    setCurrentChatId(chat.chatId);
+    setMessages(chat.messages || []);
+  };
+
+  // Handle search
+  const handleSearch = async (query) => {
+    if (!user || !query.trim()) {
+      loadChatHistory(user.userId);
+      return;
+    }
+    
+    try {
+      const response = await fetch(
+        `${getApiUrl()}/api/auth/chats/search?query=${encodeURIComponent(query)}`,
+        { headers: { 'x-user-id': user.userId } }
+      );
+      const results = await response.json();
+      setRecentChats(results);
+    } catch (error) {
+      console.error('Error searching chats:', error);
+    }
+  };
+
+  // Handle logout
+  const handleLogout = () => {
+    localStorage.removeItem('aithink-user-id');
+    window.location.reload();
+  };
+
+  // Handle theme change
+  const handleThemeChange = async () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    document.body.setAttribute('data-theme', newTheme);
+    
+    if (user) {
+      try {
+        await fetch(`${getApiUrl()}/api/auth/user/profile`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-user-id': user.userId
+          },
+          body: JSON.stringify({ theme: newTheme })
+        });
+      } catch (error) {
+        console.error('Error updating theme:', error);
+      }
+    }
+  };
+
+  // Handle submit
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    // Check if can accept new request
     const canSubmit = systemStatus?.queue?.canAcceptNew !== false;
     if (!input.trim() || isLoading || !socket || !canSubmit) return;
 
-    // Add user message
+    // Create new chat if needed
+    if (!currentChatId) {
+      setCurrentChatId(`chat_${Date.now()}`);
+    }
+
     setMessages(prev => [...prev, {
       role: 'user',
-      content: input
+      content: input,
+      timestamp: new Date().toISOString()
     }]);
 
-    // Add queued message (waiting for processing)
     setMessages(prev => [...prev, {
       role: 'queued',
       content: '',
       isStreaming: true
     }]);
 
-    // Send to server
-    socket.emit('chat:message', { message: input });
-
+    socket.emit('chat:message', { message: input, model: selectedModel });
     setInput('');
   };
 
+  // Handle stop
   const handleStop = () => {
     if (!socket) return;
     
-    // Emit stop signal to backend
     socket.emit('chat:stop');
-    
-    // Update UI
     setIsLoading(false);
     setMessages(prev => {
       const newMessages = [...prev];
@@ -201,164 +351,208 @@ const ChatInterface = () => {
   };
 
   return (
-    <div className="app-container">
-      <div className="app-header">
-        <h1>
-          <img src="/AIThink_app_image.png" alt="AIThink" style={{ height: '40px', verticalAlign: 'middle', marginRight: '10px' }} />
-          AIThink
-        </h1>
-        <p>Hỗ trợ khám khám phá quá trình giải một bài toán như thế nào</p>
-      </div>
-
-      <div className="system-status">
-        <div className="status-item">
-          <span className="status-icon">👥</span>
-          <span className="status-value">{systemStatus?.onlineUsers || 0}</span>
-          <span className="status-label">đang truy cập</span>
-        </div>
-        <div className="status-item">
-          <span className="status-icon">⏳</span>
-          <span className="status-value">{systemStatus?.queue?.queuedRequests || 0}</span>
-          <span className="status-label">đang chờ</span>
-        </div>
-        <div className="status-item ready">
-          <span className="status-icon">✅</span>
-          <span className="status-label">Sẵn sàng xử lý yêu cầu</span>
-        </div>
-      </div>
-
-      <div className="chat-container">
-        <div className="messages-container">
-          {messages.length === 0 && (
-            <div style={{ textAlign: 'center', color: '#999', marginTop: '50px' }}>
-              <h2>Chào mừng bạn! 👋</h2>
-              <p>Hãy đặt câu hỏi toán học để bắt đầu</p>
+    <div className="app-layout">
+      <Sidebar
+        user={user}
+        recentChats={recentChats}
+        currentChatId={currentChatId}
+        onNewChat={handleNewChat}
+        onSelectChat={handleSelectChat}
+        onSearch={handleSearch}
+        onLogout={handleLogout}
+        onThemeChange={handleThemeChange}
+      />
+      
+      <div className="main-content">
+        <div className="chat-header">
+          <div className="status-bar">
+            <ModelSelector 
+              socket={socket} 
+              onModelChange={setSelectedModel}
+            />
+            <div className="status-item">
+              <span className="status-icon">👥</span>
+              <span className="status-value">{systemStatus?.onlineUsers || 0}</span>
+              <span className="status-label">đang truy cập</span>
             </div>
-          )}
-          
-          {messages.map((msg, idx) => (
-            <div key={idx} className={`message message-${msg.role === 'thinking' || msg.role === 'queued' ? 'assistant' : msg.role}`}>
-              {msg.role === 'queued' ? (
-                <div className="message-content queued-bubble">
-                  <div style={{ 
-                    fontSize: '0.85em', 
-                    fontWeight: '600', 
-                    color: '#667eea',
-                    marginBottom: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}>
-                    ⏳ Đang xếp hàng đợi...
-                    <span style={{
-                      display: 'inline-block',
-                      width: '6px',
-                      height: '6px',
-                      borderRadius: '50%',
-                      backgroundColor: '#667eea',
-                      animation: 'pulse 1.5s ease-in-out infinite'
-                    }}></span>
-                  </div>
-                  <div style={{ 
-                    fontStyle: 'italic', 
-                    color: '#999', 
-                    fontSize: '0.9em'
-                  }}>
-                    Yêu cầu của bạn đang trong hàng đợi. Vui lòng chờ đợi...
-                  </div>
+            <div className="status-item">
+              <span className="status-icon">⏳</span>
+              <span className="status-value">{systemStatus?.queue?.queuedRequests || 0}</span>
+              <span className="status-label">đang chờ</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="messages-wrapper">
+          <div className="messages-container">
+            {messages.length === 0 && (
+              <div className="welcome-screen">
+                <div className="welcome-logo">
+                  <img src="/assets/AIThink_app_image.png" alt="AIThink" />
                 </div>
-              ) : msg.role === 'thinking' ? (
-                <div className="message-content thinking-bubble">
-                  <div style={{ 
-                    fontSize: '0.85em', 
-                    fontWeight: '600', 
-                    color: '#ff8800',
-                    marginBottom: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}>
-                    🤔 Chain of Thought
-                    {msg.isStreaming && (
-                      <span style={{
-                        display: 'inline-block',
-                        width: '6px',
-                        height: '6px',
-                        borderRadius: '50%',
-                        backgroundColor: '#ff8800',
-                        animation: 'pulse 1.5s ease-in-out infinite'
-                      }}></span>
-                    )}
+                <h1>Chào mừng đến với AIThink</h1>
+                <p>Khám phá quá trình giải quyết bài toán một cách trực quan</p>
+              </div>
+            )}
+            
+            {messages.map((msg, idx) => {
+              if (msg.role === 'queued') {
+                return (
+                  <div key={idx} className="message queued-message">
+                    <div className="queued-content">
+                      <span className="pulse-dot"></span>
+                      Đang xếp hàng đợi...
+                    </div>
                   </div>
-                  <div style={{ 
-                    fontStyle: 'italic', 
-                    color: '#555', 
-                    fontSize: '0.92em',
-                    lineHeight: '1.8',
-                    whiteSpace: 'pre-wrap'
-                  }}>
-                    <StreamingMathRenderer 
-                      content={msg.content || 'Đang suy nghĩ...'} 
-                      isStreaming={msg.isStreaming || false}
-                    />
+                );
+              }
+              
+              if (msg.role === 'thinking') {
+                const isMinimized = thinkingMinimized[idx] !== false;
+                return (
+                  <div key={idx} className="thinking-message">
+                    <div className="thinking-header">
+                      <div className="thinking-header-left">
+                        <div className="message-avatar">
+                          <img src="/assets/AIThink_app_image.png" alt="AI" />
+                        </div>
+                        <div className="thinking-label">
+                          <span>🤔</span>
+                          <span>Suy nghĩ...</span>
+                        </div>
+                      </div>
+                      {!msg.isStreaming && (
+                        <button 
+                          className="thinking-toggle-btn" 
+                          onClick={() => setThinkingMinimized(prev => ({ ...prev, [idx]: !isMinimized }))}
+                          title={isMinimized ? 'Mở rộng' : 'Thu gọn'}
+                        >
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            {isMinimized ? (
+                              <path d="M19 9l-7 7-7-7" />
+                            ) : (
+                              <path d="M5 15l7-7 7 7" />
+                            )}
+                          </svg>
+                        </button>
+                      )}
+                    </div>
+                    <div className={`thinking-content ${isMinimized ? 'minimized' : 'maximized'}`}>
+                      <StreamingMathRenderer 
+                        content={msg.content || 'Đang suy nghĩ...'} 
+                        isStreaming={msg.isStreaming || false}
+                      />
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="message-content">
+                );
+              }
+              
+              return (
+                <div key={idx}>
                   {msg.role === 'user' ? (
-                    msg.content
-                  ) : (
-                    <StreamingMathRenderer 
-                      content={msg.content || ''} 
-                      isStreaming={msg.isStreaming || false}
+                    <ChatMessage
+                      message={msg}
+                      onEdit={() => {
+                        setInput(msg.content);
+                        inputRef.current?.focus();
+                      }}
+                      onCopy={() => {
+                        navigator.clipboard.writeText(msg.content);
+                      }}
                     />
+                  ) : (
+                    <div className="message assistant-message">
+                      <div className="message-avatar">
+                        <img src="/assets/AIThink_app_image.png" alt="AI" />
+                      </div>
+                      <div className="message-wrapper">
+                        <div className="message-content answer-bubble">
+                          <StreamingMathRenderer 
+                            content={msg.content || ''} 
+                            isStreaming={msg.isStreaming || false}
+                            tikzCode={msg.tikzCode || null}
+                          />
+                        </div>
+                        {!msg.isStreaming && (
+                          <div className="message-actions">
+                            <span className="message-time">
+                              {msg.timestamp && new Date(msg.timestamp).toLocaleString('vi-VN')}
+                            </span>
+                            <button className="action-btn" onClick={() => handleSubmit({ preventDefault: () => {} })} title="Hỏi lại">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <polyline points="1 4 1 10 7 10" />
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                              </svg>
+                            </button>
+                            <button className="action-btn" onClick={() => navigator.clipboard.writeText(msg.content)} title="Copy">
+                              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
+              );
+            })}
+            <div ref={messagesEndRef} />
+          </div>
 
-        <div className="input-container">
-          <form onSubmit={handleSubmit} className="input-form">
-            <textarea
-              ref={inputRef}
-              className="input-textarea"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Nhập câu hỏi toán (có thể gõ LaTeX: $...$)"
-              rows="2"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit(e);
-                }
-              }}
-            />
-            {!isLoading ? (
-              <button 
-                type="submit" 
-                className="send-button"
-                disabled={!input.trim() || systemStatus?.queue?.canAcceptNew === false}
-                title={systemStatus?.queue?.canAcceptNew === false ? 'Hàng đợi đầy, vui lòng chờ...' : ''}
-              >
-                <span>📤</span>
-                <span>Gửi</span>
-              </button>
-            ) : (
-              <button 
-                type="button"
-                className="stop-button"
-                onClick={handleStop}
-              >
-                <span>⏹️</span>
-                <span>Dừng</span>
-              </button>
-            )}
-          </form>
+          <div className="input-area">
+            <form onSubmit={handleSubmit} className="input-form">
+              <textarea
+                ref={inputRef}
+                className="input-textarea"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Nhập câu hỏi toán (hỗ trợ LaTeX: $...$)"
+                rows="3"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
+              />
+              <div className="input-actions">
+                {!isLoading ? (
+                  <button 
+                    type="submit" 
+                    className="send-button"
+                    disabled={!input.trim() || systemStatus?.queue?.canAcceptNew === false}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <line x1="22" y1="2" x2="11" y2="13" />
+                      <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                    </svg>
+                  </button>
+                ) : (
+                  <button 
+                    type="button"
+                    className="stop-button"
+                    onClick={handleStop}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                      <rect x="6" y="6" width="12" height="12" rx="2" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </form>
+          </div>
+
+          <ChatFooter onOpenDialog={setDialogType} />
         </div>
       </div>
+
+      <Dialog
+        isOpen={dialogType !== null}
+        onClose={() => setDialogType(null)}
+        type={dialogType}
+      />
     </div>
   );
 };

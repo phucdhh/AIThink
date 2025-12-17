@@ -1,0 +1,19 @@
+{
+  "chatId": "chat_1765856365526",
+  "title": " [latex]x^2 + 2x + 1[/latex] ",
+  "messages": [
+    {
+      "role": "user",
+      "content": " [latex]x^2 + 2x + 1[/latex] ",
+      "timestamp": "2025-12-16T03:39:25.527Z"
+    },
+    {
+      "role": "queued",
+      "content": "",
+      "isStreaming": true,
+      "timestamp": "2025-12-16T03:39:27.557Z"
+    }
+  ],
+  "createdAt": "2025-12-16T03:41:40.743Z",
+  "updatedAt": "2025-12-16T03:41:40.743Z"
+}

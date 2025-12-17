@@ -1,0 +1,25 @@
+{
+  "chatId": "chat_1765826141327",
+  "title": "Typst khác gì latex?",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Typst khác gì latex?",
+      "timestamp": "2025-12-15T19:15:41.328Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Hmm, người dùng đang hỏi về sự khác biệt giữa Typst và LaTeX, hai công cụ soạn thảo công thức toán học. Mình cần cung cấp một so sánh rõ ràng nhưng ngắn gọn, vì đây là câu hỏi kiến thức chung hơn là bài toán cụ thể.\n\nMình đã chuẩn bị sẵn một so sánh chi tiết trong quá trình huấn luyện, nhưng cần trình bày sao cho dễ hiểu. Điểm mạnh của LaTeX là ổn định và phổ biến trong toán học, còn Typst nổi trội hơn về cú pháp tự nhiên và tích hợp tốt với thiết kế trang. \n\nNgười dùng có lẽ đang tìm hiểu để chọn công cụ phù hợp cho dự án của họ. Mình nên nhấn mạnh cả ưu điểm và nhược điểm của mỗi công cụ, đặc biệt là đối với người dùng Việt Nam - LaTeX có cộng đồng hỗ trợ lớn hơn.\n\nÀ, cần lưu ý rằng câu hỏi này không liên quan đến toán học thuần túy, nên không cần dùng phần TikZ hay công thức toán trong response. Chỉ cần trình bày so sánh rõ ràng, có thể thêm ví dụ minh họa để dễ hình dung.\n",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T19:16:25.443Z"
+    },
+    {
+      "role": "assistant",
+      "content": "**Typst** và **LaTeX** đều là công cụ dùng để soạn thảo văn bản, đặc biệt là công thức toán học, nhưng chúng có những điểm khác biệt cơ bản:\n\n### 1. **Ngôn ngữ và cú pháp**\n- **LaTeX**: Sử dụng một ngôn ngữ riêng dựa trên cấu trúc markup. Ví dụ: `$a + b = c$` để viết công thức toán.\n- **Typst**: Sử dụng cú pháp gần giống như mã nguồn, tự nhiên hơn. Ví dụ: `a + b = c` viết công thức toán.\n\n### 2. **Tích hợp thiết kế**\n- **LaTeX**: Chủ yếu tập trung vào nội dung, cần kết hợp với CSS hay PDF để định dạng. Đòi hỏi nhiều cấu hình.\n- **Typst**: Tích hợp trực tiếp với CSS và JavaScript, cho phép thiết kế toàn diện từ đầu, dễ tạo giao diện đẹp.\n\n### 3. **Hiệu suất**\n- **LaTeX**: Có thể chậm khi xử lý tài liệu lớn.\n- **Typst**: Tốc độ nhanh hơn, xử lý nhanh ngay cả với tài liệu lớn.\n\n### 4. **Cộng đồng và tài nguyên**\n- **LaTeX**: Có cộng đồng lớn, nhiều template, tài liệu hướng dẫn phong phú.\n- **Typst**: Cộng đồng nhỏ hơn, ít template sẵn có hơn.\n\n### 5. **Ứng dụng**\n- **LaTeX**: Phổ biến trong xuất bản học thuật, luận văn, báo cáo khoa học.\n- **Typst**: Phù hợp cho thiết kế trang, tài liệu hiện đại, tích hợp với web.\n\n### Kết luận:\n- Nếu bạn cần ổn định và cộng đồng hỗ trợ tốt, chọn **LaTeX**.\n- Nếu muốn giao diện đẹp, hiện đại, chọn **Typst**.",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T19:16:00.569Z"
+    }
+  ],
+  "createdAt": "2025-12-15T19:16:24.774Z",
+  "updatedAt": "2025-12-15T19:16:24.774Z"
+}

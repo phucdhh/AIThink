@@ -4,36 +4,42 @@
   box-sizing: border-box;
 }
 
+html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  min-height: 100vh;
+  background: #ffffff;
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100%;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
+  padding: 0;
+  margin: 0;
   overflow: hidden;
 }
 
 .app-container {
   width: 100%;
-  max-width: 1200px;
   background: white;
-  border-radius: 20px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 90vh;
+  height: 100vh;
   position: relative;
 }
 
@@ -146,6 +152,15 @@ body {
   transition: none;
 }
 
+/* Answer bubble styling - wider for better readability */
+.assistant-message:has(.answer-bubble) {
+  max-width: 95% !important;
+}
+
+.answer-bubble {
+  max-width: 100% !important;
+}
+
 .message-user .message-content {
   background: #667eea;
   color: white;
@@ -182,7 +197,7 @@ body {
 }
 
 .thinking-bubble .streaming-math-content > div {
-  margin-bottom: 10px;
+  margin-bottom: 4px;
   line-height: 1.9;
 }
 
@@ -254,7 +269,7 @@ body {
 }
 
 .math-content li {
-  margin-bottom: 8px;
+  margin-bottom: 4px;
   line-height: 1.8;
 }
 
@@ -569,13 +584,85 @@ body {
 .svg-diagram-container {
   position: relative;
   z-index: 1;
+  max-width: 800px;
+  min-width: 400px;
+  min-height: 400px;
+  width: 100%;
+  margin: 10px auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
+  overflow: visible;
+  padding: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.svg-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
 
 .svg-diagram svg {
-  width: 100% !important;
+  width: auto !important;
   height: auto !important;
-  max-width: 500px;
+  max-width: 90%;
+  max-height: 90%;
   display: block;
-  margin: 0 auto;
+  cursor: grab;
+  transition: transform 0.1s ease;
+}
+
+.svg-diagram svg:active {
+  cursor: grabbing;
+}
+
+/* Make TikZ lines thicker and more visible */
+.svg-diagram svg path,
+.svg-diagram svg line,
+.svg-diagram svg polyline,
+.svg-diagram svg polygon {
+  stroke-width: 2 !important;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Zoom controls */
+.svg-controls {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: flex;
+  gap: 4px;
+  z-index: 10;
+}
+
+.svg-control-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+}
+
+.svg-control-btn:hover {
+  background: white;
+  transform: scale(1.1);
+}
+
+.svg-control-btn:active {
+  transform: scale(0.95);
 }
 

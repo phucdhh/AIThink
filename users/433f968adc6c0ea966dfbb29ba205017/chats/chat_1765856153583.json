@@ -1,0 +1,30 @@
+{
+  "chatId": "chat_1765856153583",
+  "title": "Lô",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Lô",
+      "timestamp": "2025-12-16T03:35:53.584Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Hmm, người dùng gửi một từ viết tắt \"Lô\" mà không có bất kỳ yêu cầu toán học nào cụ thể. Có lẽ họ đang thắc mắc về một khái niệm toán học liên quan đến từ này, nhưng không rõ là gì.\n\nLô có thể là viết tắt của nhiều khái niệm toán học khác nhau như lôgarit, lôgarit tự nhiên, hoặc có thể là từ tiếng Anh \"log\". Nhưng cũng có thể người dùng đang\n\n_[Đã dừng bởi người dùng]_ hỏi",
+      "isStreaming": false,
+      "timestamp": "2025-12-16T03:36:54.393Z"
+    },
+    {
+      "role": "user",
+      "content": "Tớ chào cậu thôi",
+      "timestamp": "2025-12-16T03:36:32.728Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Hmm, người dùng này chào mình bằng cách nói \"Tớ chào cậu thôi\" một cách thân mật. Mình là trợ lý toán học nên cần đáp lại sự chào hỏi này một cách thân thiện và chuyên nghiệp.\n\n_[Đã dừng bởi người dùng]_ \n\n",
+      "isStreaming": false,
+      "timestamp": "2025-12-16T03:36:54.393Z"
+    }
+  ],
+  "createdAt": "2025-12-16T03:36:54.586Z",
+  "updatedAt": "2025-12-16T03:36:54.586Z"
+}

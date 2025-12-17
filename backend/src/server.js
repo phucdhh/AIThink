@@ -9,6 +9,7 @@ import ollamaService from './services/ollamaService.js';
 import QueueService from './services/queueService.js';
 import { chatHandler } from './api/chat.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
+import authRouter from './api/auth/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -43,7 +44,7 @@ const io = new Server(httpServer, {
 });
 
 const PORT = process.env.PORT || 3000;
-const MAX_CONCURRENT = parseInt(process.env.MAX_CONCURRENT_REQUESTS) || 3;
+const MAX_CONCURRENT = parseInt(process.env.MAX_CONCURRENT_REQUESTS) || 8;
 
 // Middleware
 app.use(cors({
@@ -53,7 +54,7 @@ app.use(cors({
 app.use(express.json());
 
 // Initialize queue service with max concurrent = 8
-const queueService = new QueueService(8);
+const queueService = new QueueService(MAX_CONCURRENT);
 
 // Track online users
 let onlineUsers = 0;
@@ -72,6 +73,8 @@ queueService.setStatusChangeCallback(() => {
 });
 
 // REST API routes
+app.use('/api/auth', authRouter);
+
 app.get('/api/health', async (req, res) => {
   const ollamaHealthy = await ollamaService.healthCheck();
   res.json({

@@ -19,7 +19,7 @@ async function test() {
     console.log('🎨 Testing TikZ compilation...');
     const svg = await tikzService.compileToSVG(testTikz);
     console.log('✅ Success! SVG length:', svg.length);
-    console.log(svg.substring(0, 200) + '...');
+    console.log(svg);
   } catch (error) {
     console.error('❌ Error:', error.message);
   }

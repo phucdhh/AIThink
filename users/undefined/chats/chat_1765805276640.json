@@ -1,0 +1,25 @@
+{
+  "chatId": "chat_1765805276640",
+  "title": "Giải phương trình x - 2 = -x + 1",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Giải phương trình x - 2 = -x + 1",
+      "timestamp": "2025-12-15T13:27:56.643Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Chúng ta cần giải phương trình: \\( x - 2 = -x + 1 \\)\n\nĐầu tiên, tôi sẽ thu thập tất cả các số hạng chứa biến x vào một vế và số hạng không chứa biến vào vế còn lại.\n\nBước 1: Cộng 2 vào cả hai vế để di chuyển số hạng không chứa biến sang vế phải.\n\n\\( x - 2 + 2 = -x + 1 + 2 \\)\n\n\\( x = -x + 3 \\)\n\nBước 2: Cộng x vào cả hai vế để đưa các số hạng chứa biến x về một vế.\n\n\\( x + x = -x + 3 + x \\)\n\n\\( 2x = 3 \\)\n\nBước 3: Chia cả hai vế cho 2 để tìm giá trị của x.\n\n\\( x = \\frac{3}{2} \\)\n\nTôi cần kiểm tra lại đáp án để đảm bảo. Thay x = 1.5 vào phương trình gốc:\n\n1.5 - 2 = -1.5 + 1\n\n-0.5 = -0.5\n\nVậy phương trình đúng.\n\nTôi sẽ trình bày phần thinking và answer một cách rõ ràng.\n",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T13:28:38.133Z"
+    },
+    {
+      "role": "assistant",
+      "content": "**THINKING**  \n- Phân tích: Phương trình có dạng \\( ax + b = cx + d \\).  \n- Bước 1: Đưa các số hạng chứa biến \\( x \\) sang một vế, số hạng không chứa biến sang vế còn lại.  \n- Bước 2: Thực hiện phép tính để tìm \\( x \\).  \n\n**ANSWER**  \nPhương trình: \\( x - 2 = -x + 1 \\).  \n\n**Bước 1:** Cộng 2 vào cả hai vế:  \n\\( x - 2 + 2 = -x + 1 + 2 \\)  \n\\( x = -x + 3 \\)  \n\n**Bước 2:** Cộng \\( x \\) vào cả hai vế:  \n\\( x + x = -x + 3 + x \\)  \n\\( 2x = 3 \\)  \n\n**Bước 3:** Chia cả hai vế cho 2:  \n\\( x = \\frac{3}{2} \\)  \n\n**Kết luận:** Nghiệm của phương trình là \\( x = \\frac{3}{2} \\).  \n\n**Kiểm tra:** Thay \\( x = \\frac{3}{2} \\) vào phương trình:  \n\\( \\frac{3}{2} - 2 = -\\frac{3}{2} + 1 \\)  \n\\( -\\frac{1}{2} = -\\frac{1}{2} \\) (Đúng).",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T13:28:17.792Z"
+    }
+  ],
+  "createdAt": "2025-12-15T13:28:38.248Z",
+  "updatedAt": "2025-12-15T13:28:38.248Z"
+}

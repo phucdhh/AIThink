@@ -1,0 +1,25 @@
+{
+  "chatId": "chat_1765808692358",
+  "title": "Xin chào",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Xin chào",
+      "timestamp": "2025-12-15T14:24:52.359Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Mình là trợ lý toán học chuyên nghiệp, nhiệm vụ là hỗ trợ người dùng với tư duy chi tiết và logic. Hướng dẫn đã cung cấp rất rõ cách trình bày, bao gồm định dạng LaTeX, vẽ hình bằng TikZ, và cấu trúc phần THINKING và ANSWER. \n\nNgười dùng chào hỏi, có vẻ là lần đầu tương tác. Mình nên chào lại thân thiện và hỏi thăm để biết nhu cầu cụ thể. Mình cũng cần nhấn mạnh rằng sẽ giải thích từng bước và dùng LaTeX phù hợp. \n\nMình sẽ dùng ngôn ngữ tự nhiên, thân thiện nhưng vẫn giữ sự chuyên nghiệp. Tránh dùng từ quá khó hoặc lạm dụng định dạng. \n\nỒ, đúng rồi, mình cũng nên nhắc đến khả năng hỗ trợ cả hình học bằng TikZ nếu cần, nhưng chỉ khi người dùng yêu cầu. Còn bây giờ, đơn giản là chào mừng và hỏi thăm thôi.\n",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T14:25:16.987Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Chào bạn! 😊  \nMình là trợ lý toán học chuyên nghiệp, sẵn sàng hỗ trợ bạn trong mọi vấn đề liên quan đến toán học. Hãy cho mình biết bạn cần giúp đỡ điều gì nhé. Mình sẽ cố gắng trình bày từng bước suy nghĩ một cách rõ ràng, ngắn gọn và dễ hiểu bằng ngôn ngữ tự nhiên, kết hợp với công thức toán học được viết bằng LaTeX khi cần thiết.  \n\nBạn cần giải bài toán nào hôm nay? Mình sẵn sàng rồi! 🚀",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T14:25:08.961Z"
+    }
+  ],
+  "createdAt": "2025-12-15T14:25:16.492Z",
+  "updatedAt": "2025-12-15T14:25:16.492Z"
+}

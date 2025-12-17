@@ -1,0 +1,25 @@
+{
+  "chatId": "chat_1765791795652",
+  "title": "Giải phương trình x - 2 = -x + 1",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Giải phương trình x - 2 = -x + 1",
+      "timestamp": "2025-12-15T09:43:15.653Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Chúng ta có phương trình: x - 2 = -x + 1\n\nĐầu tiên, tôi cần thu gọn và đưa các số hạng tương tự về cùng một phía. Để làm được điều đó, tôi có thể cộng x vào cả hai vế để di chuyển x từ vế phải sang vế trái.\n\nVậy, cộng x vào cả hai vế:\n\nx - 2 + x = -x + 1 + x\n\nSau khi cộng x, ta có:\n\n2x - 2 = 1\n\nBây giờ, tôi cần tách biệt x. Tôi có thể cộng 2 vào cả hai vế để di chuyển số -2 sang vế phải.\n\nCộng 2 vào cả hai vế:\n\n2x - 2 + 2 = 1 + 2\n\nĐiều đó cho ta:\n\n2x = 3\n\nCuối cùng, để tìm x, tôi chia cả hai vế cho 2.\n\nVậy, x = 3 / 2\n\nTôi cũng có thể kiểm tra lại bằng cách thay x = 3/2 vào phương trình ban đầu.\n\nThay x = 1.5 vào vế trái: 1.5 - 2 = -0.5\n\nVế phải: -1.5 + 1 = -0.5\n\nVậy, hai vế bằng nhau, kết quả đúng.\n\nDo đó, nghiệm của phương trình là x = 3/2.\n",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T09:43:52.843Z"
+    },
+    {
+      "role": "assistant",
+      "content": "**THINKING**  \nPhân tích đề bài: Phương trình cần giải là \\( x - 2 = -x + 1 \\).  \n- Bước 1: Đưa các số hạng chứa \\( x \\) về một vế, số hạng không chứa \\( x \\) về vế kia.  \n- Bước 2: Cộng \\( x \\) vào cả hai vế để loại bỏ \\( -x \\) ở vế phải.  \n- Bước 3: Cộng 2 vào cả hai vế để loại bỏ \\( -2 \\) ở vế trái.  \n- Bước 4: Chia cả hai vế cho hệ số của \\( x \\) để tìm \\( x \\).  \n\n**ANSWER**  \n\\[\n\\boxed{x = \\dfrac{3}{2}}\n\\]",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T09:43:41.011Z"
+    }
+  ],
+  "createdAt": "2025-12-15T09:43:53.077Z",
+  "updatedAt": "2025-12-15T09:43:53.077Z"
+}

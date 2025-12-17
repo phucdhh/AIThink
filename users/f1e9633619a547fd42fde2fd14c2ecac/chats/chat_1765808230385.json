@@ -1,0 +1,25 @@
+{
+  "chatId": "chat_1765808230385",
+  "title": "xin chào",
+  "messages": [
+    {
+      "role": "user",
+      "content": "xin chào",
+      "timestamp": "2025-12-15T14:17:10.386Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Hmm, người dùng gửi một lời chào rất ngắn gọn bằng tiếng Việt. Không có yêu cầu toán học cụ thể nào cả. \n\nLà một trợ lý toán học, tôi cần xác định đây có phải là lời chào đầu tiên của họ hay không. Có lẽ họ đang tìm hiểu cách sử dụng dịch vụ của tôi. \n\nTôi nên đáp lại bằng một câu chào thân thiện, thể hiện sự sẵn sàng hỗ trợ. Nên dùng tiếng Việt vì họ đã chào bằng tiếng này. \n\nNên nhấn mạnh tính chuyên nghiệp nhưng vẫn giữ phong cách gần gũi. Có thể thêm một câu hỏi gợi mở để biết họ cần giúp gì. \n\nPhát hiện: Người dùng có vẻ mới tiếp xúc với dịch vụ này. Cần tạo thiện cảm và xây dựng niềm tin ngay từ cuộc trò chuyện đầu tiên.\n",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T14:17:31.713Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Chào bạn! 😊  \nMình là trợ lý toán học chuyên nghiệp, sẵn sàng hỗ trợ bạn trong mọi vấn đề về toán học.  \nHãy gửi câu hỏi hoặc đề bài của bạn đến mình nhé, mình sẽ cố gắng giúp bạn từng bước một một cách chi tiết và dễ hiểu nhất!",
+      "isStreaming": false,
+      "timestamp": "2025-12-15T14:17:26.089Z"
+    }
+  ],
+  "createdAt": "2025-12-15T14:22:23.160Z",
+  "updatedAt": "2025-12-15T14:22:23.160Z"
+}

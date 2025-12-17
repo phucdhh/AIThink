@@ -1,0 +1,19 @@
+{
+  "chatId": "chat_1765856190478",
+  "title": "Biện luận theo m số nghiệm của phương trình y= x^3",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Biện luận theo m số nghiệm của phương trình y= x^3 -2x^2 -m",
+      "timestamp": "2025-12-16T03:36:30.479Z"
+    },
+    {
+      "role": "queued",
+      "content": "",
+      "isStreaming": true,
+      "timestamp": "2025-12-16T03:36:32.504Z"
+    }
+  ],
+  "createdAt": "2025-12-16T03:52:13.063Z",
+  "updatedAt": "2025-12-16T03:52:13.063Z"
+}

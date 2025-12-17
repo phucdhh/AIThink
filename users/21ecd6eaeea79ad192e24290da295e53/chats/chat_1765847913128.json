@@ -1,0 +1,19 @@
+{
+  "chatId": "chat_1765847913128",
+  "title": "Dùng Định lí Taylor để tính gần đúng các số sau đế",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Dùng Định lí Taylor để tính gần đúng các số sau đến 5 chữ số thập\nphân.\n(a) √\n2.\n(b) √3\n0, 3.\n(c) cos 1.",
+      "timestamp": "2025-12-16T01:18:33.130Z"
+    },
+    {
+      "role": "thinking",
+      "content": "",
+      "isStreaming": true,
+      "timestamp": "2025-12-16T01:18:35.694Z"
+    }
+  ],
+  "createdAt": "2025-12-16T12:29:40.335Z",
+  "updatedAt": "2025-12-16T12:29:40.335Z"
+}

@@ -1,0 +1,35 @@
+**VẼ HÌNH MINH HOẠ:**
+Khi giải bài toán hình học, đồ thị, bảng biến thiên, bảng xét dấu, hãy vẽ hình minh họa bằng TikZ.
+
+***Lưu ý khi vẽ bằng TIKZ:***
+- Đặt code TikZ ở đầu phần "ANSWER"
+- KHÔNG giải thích cách vẽ TikZ
+- Phải có "```tikz" hoặc "```latex" ở đầu (chữ thường)
+- Phải có \begin{tikzpicture} và \end{tikzpicture}
+- Phải có ``` đóng ở cuối
+
+****CẤU TRÚC CODE TIKZ CHUẨN:****
+```tikz
+\begin{tikzpicture}[scale=0.8]
+   các đoạn mã tikz
+\end{tikzpicture}
+```
+
+****NODE LABELS:****
+- Mỗi \node chỉ có MỘT chữ/ký hiệu trên MỘT DÒNG
+- Đúng: `\node [left] at (A) {A};`
+- SAI: `\node [left] at (A) {A\nA};` hoặc labels trên nhiều dòng
+- Không xuống dòng trong node text
+
+****Lưu ý trong vẽ hình Tikz****
+- Luôn dùng style `[blue, thick]` cho TẤT CẢ các đường vẽ chính để đồng bộ màu
+- Dùng `\coordinate` để định nghĩa điểm
+- Dùng `calc` library cho tính toán: `($(A)!0.5!(B)$)`
+- Ghi nhãn LaTeX trực tiếp: `$\alpha$`, `$AB=5$`, `$60^\circ$`
+- Scale nhỏ gọn: `[scale=0.8]` hoặc `[scale=0.5]`
+- Tỷ lệ thực tế: 1 đơn vị = 1cm, vẽ đúng tỷ lệ với số liệu đề bài.
+- Đường phụ (trục, đường kẻ): `[gray, dashed]`
+- Highlight: `[red, thick]` hoặc `fill=blue!10`
+- Luôn ghi nhãn điểm (A, B, C...), font size = 8, point size = 3 (chẳng hạn \fill[blue] (A) circle (3pt);).
+- Khi tính toán toạ độ các điểm chỉ cần làm tròn tới 2 chữ số phần thập phân.
+- Nếu có vẽ tiếp tuyến với đường tròn, thì đoạn thẳng tiếp tuyến nên kéo dài một chút ra xa khỏi tiếp điểm.

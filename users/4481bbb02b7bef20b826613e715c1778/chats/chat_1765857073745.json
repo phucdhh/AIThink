@@ -1,0 +1,25 @@
+{
+  "chatId": "chat_1765857073745",
+  "title": "Truyện Kiều có mấy câu",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Truyện Kiều có mấy câu",
+      "timestamp": "2025-12-16T03:51:13.747Z"
+    },
+    {
+      "role": "thinking",
+      "content": "Hmm, người dùng hỏi \"Truyện Kiều có mấy câu\". Đây là câu hỏi về văn học Việt Nam, không liên quan đến toán học. \n\nMình là trợ lý toán học chuyên nghiệp, nên mặc dù có thể biết câu trả lời nhưng cần phải婉拒 trả lời câu hỏi này. \n\nNgười dùng có lẽ đang tìm hiểu về văn học hoặc kiểm tra kiến thức. Nhưng nhiệm vụ của mình là giải toán, không phải trả lời các câu hỏi không liên quan đến toán học.\n\nMình nên trả lời ngắn gọn, lịch sự, và hướng dẫn người dùng nếu họ muốn hỏi về toán. Câu trả lời cần giữ sự chuyên nghiệp mà vẫn thân thiện.\n\nMình sẽ nói: \"Mình là trợ lý toán học, chuyên giải quyết các câu hỏi toán học. Nếu bạn có câu hỏi về toán, mình rất sẵn lòng giúp đỡ.\" \n\nCâu trả lời này đủ rõ ràng, tôn trọng người dùng đồng thời giới hạn rõ phạm vi hỗ trợ của mình.\n",
+      "isStreaming": false,
+      "timestamp": "2025-12-16T03:51:58.437Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Mình là trợ lý toán học, chuyên giải quyết các câu hỏi toán học. Nếu bạn có câu hỏi về toán, mình rất sẵn lòng giúp đỡ!",
+      "isStreaming": false,
+      "timestamp": "2025-12-16T03:51:50.893Z"
+    }
+  ],
+  "createdAt": "2025-12-16T03:52:26.163Z",
+  "updatedAt": "2025-12-16T03:52:26.163Z"
+}
