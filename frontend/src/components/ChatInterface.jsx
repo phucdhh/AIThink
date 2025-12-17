@@ -350,6 +350,28 @@ const ChatInterface = () => {
     currentResponseRef.current = '';
   };
 
+  const handleDeleteChat = async (chatId) => {
+    try {
+      // Delete from backend
+      await fetch(`${getApiUrl()}/api/auth/chats/${chatId}`, {
+        method: 'DELETE',
+        headers: {
+          'x-user-id': user?.userId
+        }
+      });
+      
+      // Update UI
+      setRecentChats(prev => prev.filter(chat => chat.chatId !== chatId));
+      
+      // If deleting current chat, start a new one
+      if (chatId === currentChatId) {
+        handleNewChat();
+      }
+    } catch (error) {
+      console.error('Failed to delete chat:', error);
+    }
+  };
+
   return (
     <div className="app-layout">
       <Sidebar
@@ -361,6 +383,7 @@ const ChatInterface = () => {
         onSearch={handleSearch}
         onLogout={handleLogout}
         onThemeChange={handleThemeChange}
+        onDeleteChat={handleDeleteChat}
       />
       
       <div className="main-content">
@@ -373,12 +396,12 @@ const ChatInterface = () => {
             <div className="status-item">
               <span className="status-icon">👥</span>
               <span className="status-value">{systemStatus?.onlineUsers || 0}</span>
-              <span className="status-label">đang truy cập</span>
+              <span className="status-label">onl</span>
             </div>
             <div className="status-item">
               <span className="status-icon">⏳</span>
               <span className="status-value">{systemStatus?.queue?.queuedRequests || 0}</span>
-              <span className="status-label">đang chờ</span>
+              <span className="status-label">wait</span>
             </div>
           </div>
         </div>

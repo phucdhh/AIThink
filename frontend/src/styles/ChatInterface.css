@@ -35,20 +35,20 @@ body {
 .chat-header {
   border-bottom: 1px solid #e5e7eb;
   background: white;
-  padding: 12px 20px;
+  padding: 4px 6px;
 }
 
 .status-bar {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 12px;
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
+  gap: 2px;
+  font-size: 10px;
 }
 
 .status-icon {
@@ -285,12 +285,29 @@ body {
 /* Responsive */
 @media (max-width: 768px) {
   .app-layout {
-    flex-direction: column;
+    flex-direction: row;
+  }
+  
+  .sidebar {
+    position: fixed;
+    top: 60px;
+    left: 0;
+    z-index: 100;
+    width: auto;
+    height: auto;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.collapsed {
+    width: 50px;
   }
   
   .status-bar {
-    gap: 12px;
+    gap: 8px;
     font-size: 12px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
   }
   
   .messages-container {
@@ -299,6 +316,49 @@ body {
   
   .input-area {
     padding: 8px 0;
+  }
+  
+  /* Make thinking content use full width on mobile */
+  .thinking-message {
+    margin: 0 !important;
+    max-width: 100% !important;
+    background: #fffbeb !important;
+  }
+  
+  .thinking-content {
+    padding: 12px !important;
+    color: #78350f !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+  }
+  
+  .thinking-label {
+    color: #92400e !important;
+  }
+  
+  /* User message full width */
+  .user-message {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  /* Assistant message adjustments */
+  .assistant-message {
+    max-width: 100% !important;
+    padding: 12px !important;
+    margin: 0 !important;
+  }
+  
+  .message-avatar {
+    display: none !important;
+  }
+  
+  .message-wrapper {
+    width: 100% !important;
+  }
+  
+  .message-content {
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
 

@@ -6,3 +6,4 @@ dist/
 logs/
 .pm2/
 tmp/
+users/
