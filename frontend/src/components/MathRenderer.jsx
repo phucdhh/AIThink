@@ -41,7 +41,7 @@ const MathRenderer = ({ content }) => {
           currentParagraph = [];
         }
         elements.push(
-          <h3 key={`h3-${lineIdx}`} style={{ marginTop: '15px', marginBottom: '10px', fontSize: '1.1em', fontWeight: '600' }}>
+          <h3 key={`h3-${lineIdx}`} style={{ marginTop: '2px', marginBottom: '2px', fontSize: '1.1em', fontWeight: '600' }}>
             {line.replace(/^###\s*/, '')}
           </h3>
         );
@@ -54,7 +54,7 @@ const MathRenderer = ({ content }) => {
           currentParagraph = [];
         }
         elements.push(
-          <h2 key={`h2-${lineIdx}`} style={{ marginTop: '20px', marginBottom: '12px', fontSize: '1.3em', fontWeight: '700' }}>
+          <h2 key={`h2-${lineIdx}`} style={{ marginTop: '2px', marginBottom: '2px', fontSize: '1.3em', fontWeight: '700' }}>
             {line.replace(/^##\s*/, '')}
           </h2>
         );
@@ -68,7 +68,7 @@ const MathRenderer = ({ content }) => {
           currentParagraph = [];
         }
         elements.push(
-          <div key={`bullet-${lineIdx}`} style={{ marginLeft: '20px', marginBottom: '8px' }}>
+          <div key={`bullet-${lineIdx}`} style={{ marginLeft: '2px', marginBottom: '2px' }}>
             <span style={{ marginRight: '8px' }}>•</span>
             {renderInlineMath(line.replace(/^[\*\-\•]\s+/, ''))}
           </div>
@@ -85,7 +85,7 @@ const MathRenderer = ({ content }) => {
         const stepMatch = line.match(/^(\d+)\.\s+(.+)$/);
         if (stepMatch) {
           elements.push(
-            <div key={`step-${lineIdx}`} style={{ marginBottom: '12px', paddingLeft: '10px', borderLeft: '3px solid #667eea' }}>
+            <div key={`step-${lineIdx}`} style={{ marginBottom: '2px', paddingLeft: '10px', borderLeft: '3px solid #667eea' }}>
               <strong style={{ color: '#667eea' }}>Bước {stepMatch[1]}:</strong> {renderInlineMath(stepMatch[2])}
             </div>
           );
@@ -158,14 +158,14 @@ const MathRenderer = ({ content }) => {
       }
       
       return (
-        <div key={`para-${key}`} style={{ marginBottom: '12px', lineHeight: '1.8' }}>
+        <div key={`para-${key}`} style={{ marginBottom: '2px', lineHeight: '1.8' }}>
           {parts}
         </div>
       );
     }
     
     return (
-      <p key={`para-${key}`} style={{ marginBottom: '12px', lineHeight: '1.8' }}>
+      <p key={`para-${key}`} style={{ marginBottom: '2px', lineHeight: '1.8' }}>
         {renderInlineMath(text)}
       </p>
     );

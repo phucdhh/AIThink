@@ -171,9 +171,9 @@ const StreamingMathRenderer = ({ content, isStreaming, tikzCode = null }) => {
           try {
             elements.push(
               <div key={`display-${key++}`} style={{ 
-                margin: '15px 0', 
-                padding: '10px',
-                backgroundColor: 'rgba(102, 126, 234, 0.05)',
+                margin: '0px 0', 
+                padding: '0px',
+                backgroundColor: 'rgba(255, 255, 255, 0.05)',
                 borderRadius: '8px',
                 overflow: 'auto'
               }}>
@@ -304,14 +304,20 @@ const StreamingMathRenderer = ({ content, isStreaming, tikzCode = null }) => {
     const elements = [];
     let key = keyOffset;
 
-    // Split by lines first
+    // Split by lines first and collapse consecutive blank lines
     const lines = text.split('\n');
+    let lastWasBlank = false;
 
     lines.forEach((line, lineIdx) => {
       if (line.trim() === '') {
-        elements.push(<br key={`br-${key++}`} />);
+        // Avoid creating many consecutive <br> which produce large gaps
+        if (lastWasBlank) return;
+        lastWasBlank = true;
+        // insert a small spacer instead of raw <br>
+        elements.push(<div key={`br-${key++}`} style={{ height: '8px' }} />);
         return;
       }
+      lastWasBlank = false;
 
       // Check for special formatting
       // Headers
@@ -361,10 +367,10 @@ const StreamingMathRenderer = ({ content, isStreaming, tikzCode = null }) => {
       if (stepMatch) {
         elements.push(
           <div key={`step-${key++}`} style={{ 
-            marginBottom: '12px', 
+            marginBottom: '0px', 
             paddingLeft: '15px', 
             borderLeft: '3px solid #667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.05)',
+            backgroundColor: 'rgba(255, 255, 255, 0.05)',
             padding: '8px 15px',
             borderRadius: '0 8px 8px 0'
           }}>

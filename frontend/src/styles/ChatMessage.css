@@ -6,7 +6,7 @@
 
 .message.user-message,
 .message.assistant-message {
-  padding: 24px 20px;
+  padding: 4px 4px;
 }
 
 @keyframes fadeIn {
@@ -46,8 +46,8 @@
 }
 
 .message-avatar {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
@@ -166,8 +166,8 @@
 
 /* Avatar inside thinking message */
 .thinking-message .message-avatar {
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
   border-radius: 6px;
   overflow: hidden;
   flex-shrink: 0;

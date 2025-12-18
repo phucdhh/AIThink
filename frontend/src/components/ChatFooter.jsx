@@ -8,6 +8,10 @@ const ChatFooter = ({ onOpenDialog }) => {
         AIThink hỗ trợ khám phá quá trình giải một bài toán như thế nào
       </p>
       <div className="footer-links">
+        <a className="footer-link" href="https://truyenthong.edu.vn/" target="_blank" rel="noopener noreferrer">Home</a>
+        <span className="separator">|</span>
+        <a className="footer-link" href="https://heytex.truyenthong.edu.vn/" target="_blank" rel="noopener noreferrer">HeyTeX</a>
+        <span className="separator">|</span>
         <button className="footer-link" onClick={() => onOpenDialog('privacy')}>Privacy</button>
         <span className="separator">|</span>
         <button className="footer-link" onClick={() => onOpenDialog('terms')}>Terms</button>

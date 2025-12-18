@@ -21,6 +21,9 @@ const ChatInterface = () => {
   const [systemStatus, setSystemStatus] = useState(null);
   const [socket, setSocket] = useState(null);
   const [selectedModel, setSelectedModel] = useState('');
+  const [selectedModelName, setSelectedModelName] = useState('DeepSeek Local');
+  const selectedModelRef = useRef('');
+  const selectedModelNameRef = useRef('DeepSeek Local');
   
   // UI state
   const [dialogType, setDialogType] = useState(null);
@@ -181,6 +184,8 @@ const ChatInterface = () => {
             role: 'assistant',
             content: data.content,
             isStreaming: true,
+            modelId: selectedModelRef.current || selectedModel,
+            modelName: selectedModelNameRef.current || selectedModelName,
             timestamp: new Date().toISOString()
           });
         } else if (lastMessage && lastMessage.role === 'assistant') {
@@ -325,7 +330,9 @@ const ChatInterface = () => {
     setMessages(prev => [...prev, {
       role: 'queued',
       content: '',
-      isStreaming: true
+      isStreaming: true,
+      modelId: selectedModelRef.current || selectedModel,
+      modelName: selectedModelNameRef.current || selectedModelName
     }]);
 
     socket.emit('chat:message', { message: input, model: selectedModel });
@@ -391,17 +398,22 @@ const ChatInterface = () => {
           <div className="status-bar">
             <ModelSelector 
               socket={socket} 
-              onModelChange={setSelectedModel}
+              onModelChange={(id, name) => {
+                setSelectedModel(id);
+                setSelectedModelName(name || id);
+                selectedModelRef.current = id;
+                selectedModelNameRef.current = name || id;
+              }}
             />
             <div className="status-item">
               <span className="status-icon">👥</span>
               <span className="status-value">{systemStatus?.onlineUsers || 0}</span>
-              <span className="status-label">onl</span>
+              <span className="status-label">online</span>
             </div>
             <div className="status-item">
               <span className="status-icon">⏳</span>
               <span className="status-value">{systemStatus?.queue?.queuedRequests || 0}</span>
-              <span className="status-label">wait</span>
+              <span className="status-label">waiting</span>
             </div>
           </div>
         </div>
@@ -413,7 +425,7 @@ const ChatInterface = () => {
                 <div className="welcome-logo">
                   <img src="/assets/AIThink_app_image.png" alt="AIThink" />
                 </div>
-                <h1>Chào mừng đến với AIThink</h1>
+                <h1>Chào mừng đến với <span className="logo-ai">AI</span>Think</h1>
                 <p>Khám phá quá trình giải quyết bài toán một cách trực quan</p>
               </div>
             )}
@@ -485,17 +497,22 @@ const ChatInterface = () => {
                     />
                   ) : (
                     <div className="message assistant-message">
-                      <div className="message-avatar">
-                        <img src="/assets/AIThink_app_image.png" alt="AI" />
-                      </div>
                       <div className="message-wrapper">
-                        <div className="message-content answer-bubble">
-                          <StreamingMathRenderer 
-                            content={msg.content || ''} 
-                            isStreaming={msg.isStreaming || false}
-                            tikzCode={msg.tikzCode || null}
-                          />
-                        </div>
+                          <div className="message-header">
+                            <div className="message-header-left">
+                              <div className="message-avatar">
+                                <img src="/assets/AIThink_app_image.png" alt="AI" />
+                              </div>
+                              <div className="model-badge">{msg.modelName || selectedModelName || 'DeepSeek Local'}</div>
+                            </div>
+                          </div>
+                          <div className="message-content answer-bubble">
+                            <StreamingMathRenderer 
+                              content={msg.content || ''} 
+                              isStreaming={msg.isStreaming || false}
+                              tikzCode={msg.tikzCode || null}
+                            />
+                          </div>
                         {!msg.isStreaming && (
                           <div className="message-actions">
                             <span className="message-time">

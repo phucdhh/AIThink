@@ -28,6 +28,7 @@
   padding: 4px 8px;
   border-radius: 4px;
   transition: all 0.2s;
+  text-decoration: none;
 }
 
 .footer-link:hover {
@@ -56,6 +57,7 @@
 
   .footer-link:hover {
     background: #312e81;
+    text-decoration: underline;
   }
 
   .separator {

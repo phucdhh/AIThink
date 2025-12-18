@@ -14,7 +14,9 @@ const ModelSelector = ({ socket, onModelChange }) => {
       setModels(data.models || []);
       setSelectedModel(data.defaultModel || '');
       if (onModelChange) {
-        onModelChange(data.defaultModel);
+        // find name for defaultModel
+        const def = (data.models || []).find(m => m.id === data.defaultModel);
+        onModelChange(data.defaultModel, def?.name || 'DeepSeek Local');
       }
     });
 
@@ -27,7 +29,8 @@ const ModelSelector = ({ socket, onModelChange }) => {
     setSelectedModel(modelId);
     setIsOpen(false);
     if (onModelChange) {
-      onModelChange(modelId);
+      const model = models.find(m => m.id === modelId);
+      onModelChange(modelId, model?.name || modelId);
     }
     console.log('🤖 Model changed to:', modelId);
   };
