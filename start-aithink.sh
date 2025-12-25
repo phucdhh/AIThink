@@ -7,9 +7,9 @@ sleep 10
 # Set PATH to include Homebrew and local binaries
 export PATH="/usr/local/bin:/opt/homebrew/bin:$PATH"
 
-# Start Ollama service with 8 parallel connections
-echo "Starting Ollama with 8 parallel connections..."
-OLLAMA_NUM_PARALLEL=8 /usr/local/bin/ollama serve > /tmp/ollama.log 2>&1 &
+# Start Ollama service with 6 parallel connections
+echo "Starting Ollama with 6 parallel connections..."
+OLLAMA_NUM_PARALLEL=6 /usr/local/bin/ollama serve > /tmp/ollama.log 2>&1 &
 OLLAMA_PID=$!
 echo "Ollama started with PID: $OLLAMA_PID"
 

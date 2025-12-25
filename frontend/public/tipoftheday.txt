@@ -1,0 +1,9 @@
+Ngoài Toán ra, bạn có thể hỏi về Vật lý, Hoá học, STEAM... nữa đấy!
+AI hay mắc lỗi và có thể hoang tưởng, đừng tin hoàn toàn vào những gì AI trình bày nhé!
+AI có thể không nhớ đoạn hội thoại phía trên đâu!
+Nếu hỏi lại AI cùng câu hỏi, AI sẽ trả lời khác đấy!
+Đừng chỉ hỏi một AI, hãy chọn nhiều AI để hỏi cùng một câu hỏi!
+Nếu có code Tikz, hãy sao chép nó vào một dự án trong HeyTeX để chỉnh sửa nhé!
+Nếu nhờ AI giải giúp bài toán, bạn nên tự giải trước một lúc đã nhé!
+Nếu sau 5 phút mà AI chưa xong phần Thinking, thì nên bấm Dừng, rồi chọn AI khác!
+Nếu có bài toán mà không AI nào giải được, bạn nên gặp thầy cô giáo của mình để hỏi nhé!

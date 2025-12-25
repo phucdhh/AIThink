@@ -730,3 +730,14 @@ body {
   transform: scale(0.95);
 }
 
+/* Tip of the Day styling (welcome screen) */
+.welcome-screen .tip-of-day {
+  margin-top: 40px;
+  color: #4f46e5;
+  font-style: italic;
+  font-size: 0.98rem;
+  opacity: 0.95;
+  max-width: 720px;
+  line-height: 1.3;
+}
+

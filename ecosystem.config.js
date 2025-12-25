@@ -11,7 +11,7 @@ module.exports = {
       env: {
         NODE_ENV: 'production',
         PORT: 3000,
-        MAX_CONCURRENT_REQUESTS: 8,
+        MAX_CONCURRENT_REQUESTS: 6,
         PATH: '/Library/TeX/texbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin'
       },
       error_file: '/Users/mac/AIThink/logs/backend-error.log',
@@ -45,7 +45,7 @@ module.exports = {
       watch: false,
       max_memory_restart: '2G',
       env: {
-        OLLAMA_NUM_PARALLEL: 8,
+        OLLAMA_NUM_PARALLEL: 6,
         PATH: '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin'
       },
       error_file: '/Users/mac/AIThink/logs/ollama-error.log',

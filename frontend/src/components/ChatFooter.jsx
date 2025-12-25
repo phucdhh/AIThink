@@ -5,7 +5,7 @@ const ChatFooter = ({ onOpenDialog }) => {
   return (
     <div className="chat-footer">
       <p className="footer-slogan">
-        AIThink hỗ trợ khám phá quá trình giải một bài toán như thế nào
+        AIThink có thể mắc lỗi và không chính xác, cần kiểm tra kỹ càng!
       </p>
       <div className="footer-links">
         <a className="footer-link" href="https://truyenthong.edu.vn/" target="_blank" rel="noopener noreferrer">Home</a>

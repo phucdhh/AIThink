@@ -24,6 +24,7 @@ const ChatInterface = () => {
   const [selectedModelName, setSelectedModelName] = useState('DeepSeek Local');
   const selectedModelRef = useRef('');
   const selectedModelNameRef = useRef('DeepSeek Local');
+  const [tipOfDay, setTipOfDay] = useState('');
   
   // UI state
   const [dialogType, setDialogType] = useState(null);
@@ -120,6 +121,26 @@ const ChatInterface = () => {
       return () => clearTimeout(timer);
     }
   }, [messages, currentChatId]);
+
+  // Load a random Tip of the Day from public/tipoftheday.txt
+  useEffect(() => {
+    const loadTip = async () => {
+      try {
+        const res = await fetch('/tipoftheday.txt');
+        if (!res.ok) return;
+        const text = await res.text();
+        const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+        if (lines.length > 0) {
+          const tip = lines[Math.floor(Math.random() * lines.length)];
+          setTipOfDay(tip);
+        }
+      } catch (err) {
+        console.error('Failed to load tips:', err);
+      }
+    };
+
+    loadTip();
+  }, []);
 
   // WebSocket connection
   useEffect(() => {
@@ -426,7 +447,10 @@ const ChatInterface = () => {
                   <img src="/assets/AIThink_app_image.png" alt="AIThink" />
                 </div>
                 <h1>Chào mừng đến với <span className="logo-ai">AI</span>Think</h1>
-                <p>Khám phá quá trình giải quyết bài toán một cách trực quan</p>
+                <p>Khám phá chi tiết quá trình AI giải quyết bài toán</p>
+                {tipOfDay && (
+                  <p className="tip-of-day">Nhớ: {tipOfDay}</p>
+                )}
               </div>
             )}
             
@@ -548,7 +572,7 @@ const ChatInterface = () => {
                 className="input-textarea"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="Nhập câu hỏi toán (hỗ trợ LaTeX: $...$)"
+                placeholder="Nhập câu hỏi của bạn..."
                 rows="3"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) {
