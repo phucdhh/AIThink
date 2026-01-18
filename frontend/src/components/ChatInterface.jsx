@@ -35,6 +35,17 @@ const ChatInterface = () => {
   const currentResponseRef = useRef('');
   const inputRef = useRef(null);
 
+  const toggleIncludeInContext = (index) => {
+    setMessages(prev => {
+      const newMessages = [...prev];
+      const m = newMessages[index];
+      if (m && m.role === 'assistant') {
+        m.includeInContext = !m.includeInContext;
+      }
+      return newMessages;
+    });
+  };
+
   // Get API base URL
   const getApiUrl = () => {
     if (window.location.hostname === 'localhost') {
@@ -205,6 +216,7 @@ const ChatInterface = () => {
             role: 'assistant',
             content: data.content,
             isStreaming: true,
+            includeInContext: false,
             modelId: selectedModelRef.current || selectedModel,
             modelName: selectedModelNameRef.current || selectedModelName,
             timestamp: new Date().toISOString()
@@ -356,7 +368,20 @@ const ChatInterface = () => {
       modelName: selectedModelNameRef.current || selectedModelName
     }]);
 
-    socket.emit('chat:message', { message: input, model: selectedModel });
+    // If user selected assistant messages to include, prepend them as context
+    const contextParts = messages
+      .filter(m => m.role === 'assistant' && m.includeInContext)
+      .map(m => {
+        const ts = m.timestamp ? ` (at ${m.timestamp})` : '';
+        return `--- Previous answer${ts} ---\n${m.content}`;
+      });
+
+    const payloadMessage = contextParts.length > 0
+      ? `${contextParts.join('\n\n')}
+\n[Follow-up question]\n${input}`
+      : input;
+
+    socket.emit('chat:message', { message: payloadMessage, model: selectedModel });
     setInput('');
   };
 
@@ -542,7 +567,15 @@ const ChatInterface = () => {
                             <span className="message-time">
                               {msg.timestamp && new Date(msg.timestamp).toLocaleString('vi-VN')}
                             </span>
-                            <button className="action-btn" onClick={() => handleSubmit({ preventDefault: () => {} })} title="Hỏi lại">
+                            <label className="include-context-label" title="Nhớ nội dung này khi hỏi tiếp">
+                              <input
+                                type="checkbox"
+                                checked={!!msg.includeInContext}
+                                onChange={() => toggleIncludeInContext(idx)}
+                              />
+                              <span className="include-context-text">Nhớ</span>
+                            </label>
+                            <button className="action-btn" onClick={() => { setInput(msg.content); inputRef.current?.focus(); }} title="Hỏi lại">
                               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <polyline points="1 4 1 10 7 10" />
                                 <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />

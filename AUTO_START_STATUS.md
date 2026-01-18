@@ -49,7 +49,7 @@
 
 ### 3. ✅ Ollama (Tự động qua PM2)
 - **Quản lý**: PM2 ecosystem (cùng với Backend/Frontend)
-- **Cấu hình**: `OLLAMA_NUM_PARALLEL=8` ✅
+- **Cấu hình**: `OLLAMA_NUM_PARALLEL=6` ✅
 - **Max memory**: 2GB
 - **Auto-restart**: Yes
 - **Logs**: 

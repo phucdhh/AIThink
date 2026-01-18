@@ -525,6 +525,24 @@ body {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
+/* Small UI for include-in-context checkbox */
+.include-context-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  color: #555;
+  font-size: 0.9rem;
+}
+.include-context-label input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+}
+.include-context-text {
+  font-size: 0.85rem;
+  color: #666;
+}
+
 /* Streaming Math Renderer Styles */
 .streaming-math-content {
   animation: streamFadeIn 0.2s ease-in;

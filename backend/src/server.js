@@ -43,7 +43,7 @@ const io = new Server(httpServer, {
   }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5172;
 const MAX_CONCURRENT = parseInt(process.env.MAX_CONCURRENT_REQUESTS) || 8;
 
 // Middleware
