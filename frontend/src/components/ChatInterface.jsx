@@ -25,6 +25,8 @@ const ChatInterface = () => {
   const selectedModelRef = useRef('');
   const selectedModelNameRef = useRef('DeepSeek Local');
   const [tipOfDay, setTipOfDay] = useState('');
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   
   // UI state
   const [dialogType, setDialogType] = useState(null);
@@ -381,8 +383,25 @@ const ChatInterface = () => {
 \n[Follow-up question]\n${input}`
       : input;
 
-    socket.emit('chat:message', { message: payloadMessage, model: selectedModel });
+    // If image is uploaded, auto-switch to Qwen3 Vision
+    const modelToUse = uploadedImage ? 'qwen3-vl:235b-cloud' : selectedModel;
+    if (uploadedImage && modelToUse !== selectedModel) {
+      console.log('📷 Image detected, auto-switching to Qwen3 Vision');
+      setSelectedModel(modelToUse);
+      setSelectedModelName('Qwen3 Vision');
+      selectedModelRef.current = modelToUse;
+      selectedModelNameRef.current = 'Qwen3 Vision';
+    }
+
+    socket.emit('chat:message', { 
+      message: payloadMessage, 
+      model: modelToUse,
+      image: uploadedImage 
+    });
+    
     setInput('');
+    setUploadedImage(null);
+    setImagePreview(null);
   };
 
   // Handle stop
@@ -425,6 +444,44 @@ const ChatInterface = () => {
     }
   };
 
+  // Handle image upload
+  const handleImageUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Vui lòng chọn file ảnh (PNG, JPG, JPEG)');
+      return;
+    }
+
+    // Check file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Kích thước ảnh không được vượt quá 10MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const base64 = event.target.result.split(',')[1];
+      setUploadedImage(base64);
+      setImagePreview(event.target.result);
+      
+      // Auto-switch to Qwen3 Vision when image is uploaded
+      console.log('📷 Image detected, auto-switching to Qwen3 Vision');
+      setSelectedModel('qwen3-vl:235b-cloud');
+      setSelectedModelName('Qwen3 Vision');
+      selectedModelRef.current = 'qwen3-vl:235b-cloud';
+      selectedModelNameRef.current = 'Qwen3 Vision';
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemoveImage = () => {
+    setUploadedImage(null);
+    setImagePreview(null);
+  };
+
   return (
     <div className="app-layout">
       <Sidebar
@@ -443,7 +500,8 @@ const ChatInterface = () => {
         <div className="chat-header">
           <div className="status-bar">
             <ModelSelector 
-              socket={socket} 
+              socket={socket}
+              selectedModel={selectedModel}
               onModelChange={(id, name) => {
                 setSelectedModel(id);
                 setSelectedModelName(name || id);
@@ -600,22 +658,49 @@ const ChatInterface = () => {
 
           <div className="input-area">
             <form onSubmit={handleSubmit} className="input-form">
-              <textarea
-                ref={inputRef}
-                className="input-textarea"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Nhập câu hỏi của bạn..."
-                rows="3"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit(e);
-                  }
-                }}
-              />
-              <div className="input-actions">
-                {!isLoading ? (
+              <div className="input-wrapper-flex">
+                <div className="upload-buttons-stack">
+                  <label className={`upload-image-btn ${uploadedImage ? 'has-image' : ''}`} title={uploadedImage ? "Đã có ảnh - Click để đổi ảnh" : "Tải ảnh lên"}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      style={{ display: 'none' }}
+                    />
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                      <circle cx="8.5" cy="8.5" r="1.5"/>
+                      <polyline points="21 15 16 10 5 21"/>
+                    </svg>
+                  </label>
+                  {uploadedImage && (
+                    <button 
+                      type="button"
+                      className="remove-image-btn-small" 
+                      onClick={handleRemoveImage}
+                      title="Xóa ảnh"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+                <div className="textarea-wrapper">
+                  <textarea
+                    ref={inputRef}
+                    className="input-textarea"
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    placeholder={uploadedImage ? "📷 Đã có ảnh. Mô tả yêu cầu hoặc để trống..." : "Nhập câu hỏi của bạn..."}
+                    rows="3"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSubmit(e);
+                      }
+                    }}
+                  />
+                  <div className="input-actions">
+                    {!isLoading ? (
                   <button 
                     type="submit" 
                     className="send-button"
@@ -637,6 +722,8 @@ const ChatInterface = () => {
                     </svg>
                   </button>
                 )}
+                  </div>
+                </div>
               </div>
             </form>
           </div>

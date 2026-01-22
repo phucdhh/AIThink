@@ -15,8 +15,7 @@ fi
 # Check if Ollama is running
 if ! curl -s http://localhost:11434/api/version &> /dev/null; then
     echo "⚠️  Warning: Ollama is not running on port 11434"
-    echo "   AIThink requires Ollama to be running"
-    echo "   Please start Ollama separately (it should auto-start on macOS)"
+    echo "   Start Ollama with optimizations: ./start-ollama.sh"
     echo ""
 fi
 

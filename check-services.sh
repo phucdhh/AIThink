@@ -8,19 +8,20 @@ echo ""
 
 # Check Cloudflare Tunnel
 echo "🌐 Cloudflare Tunnel:"
-if ps aux | grep cloudflared | grep -v grep > /dev/null; then
-    PID=$(ps aux | grep cloudflared | grep -v grep | awk '{print $2}')
+if ps aux | grep "config-aithink.yml" | grep -v grep > /dev/null; then
+    PID=$(ps aux | grep "config-aithink.yml" | grep -v grep | awk '{print $2}')
     echo "   ✅ Running (PID: $PID)"
     
     # Check active connection
     if cloudflared tunnel info 601ea576-981e-4b58-9f0a-1fbe60937394 2>&1 | grep -q "does not have any active"; then
         echo "   ⚠️  No active connection - needs restart!"
-        echo "   💡 Run: sudo pkill -9 cloudflared && cloudflared tunnel run 601ea576-981e-4b58-9f0a-1fbe60937394 > /tmp/cloudflared.log 2>&1 &"
+        echo "   💡 Run: cloudflared tunnel --config ~/.cloudflared/config-aithink.yml run aithink > /tmp/cloudflared-aithink.log 2>&1 &"
     else
         echo "   ✅ Has active connection"
     fi
 else
     echo "   ❌ Not running"
+    echo "   💡 Run: cloudflared tunnel --config ~/.cloudflared/config-aithink.yml run aithink > /tmp/cloudflared-aithink.log 2>&1 &"
 fi
 echo ""
 

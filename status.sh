@@ -45,6 +45,17 @@ echo "🔹 Ollama (port 11434):"
 if curl -s http://localhost:11434/api/version &> /dev/null; then
     OLLAMA_VERSION=$(curl -s http://localhost:11434/api/version | grep -o '"version":"[^"]*"' | cut -d'"' -f4)
     echo "   ✅ Ollama is running (version: $OLLAMA_VERSION)"
+    
+    # Check optimizations
+    OLLAMA_PID=$(ps aux | grep "ollama serve" | grep -v grep | awk '{print $2}')
+    if [ -n "$OLLAMA_PID" ]; then
+        if ps eww -p $OLLAMA_PID 2>&1 | grep -q "OLLAMA_FLASH_ATTENTION=1"; then
+            echo "   ⚡ Flash Attention: enabled"
+        fi
+        if ps eww -p $OLLAMA_PID 2>&1 | grep -q "OLLAMA_KV_CACHE_TYPE=q8_0"; then
+            echo "   💾 KV Cache: q8_0 (optimized)"
+        fi
+    fi
 else
     echo "   ❌ Ollama is not running"
 fi

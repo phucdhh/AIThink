@@ -29,7 +29,7 @@ export const chatHandler = async (socket, queueService) => {
   });
   
   socket.on('chat:message', async (data) => {
-    const { message, model } = data;
+    const { message, model, image } = data;
 
     if (!message || typeof message !== 'string') {
       socket.emit('chat:error', { error: 'Invalid message' });
@@ -53,11 +53,15 @@ export const chatHandler = async (socket, queueService) => {
         let lastTikzCheckLength = 0;
 
         // Get selected model or use default
-        const selectedModel = model || aiConfig.defaultModel;
+        // If image is provided, force qwen3-vl:235b-cloud
+        const selectedModel = image ? 'qwen3-vl:235b-cloud' : (model || aiConfig.defaultModel);
         const selectedModelInfo = aiConfig.models.find(m => m.id === selectedModel);
         const apiKey = selectedModelInfo?.type === 'cloud' ? aiConfig.apiKey : null;
         
         console.log(`🤖 Using model: ${selectedModel} (${selectedModelInfo?.type || 'local'})`);
+        if (image) {
+          console.log('📷 Image attached, using vision model');
+        }
 
         try {
           await ollamaService.chat(message, async (chunk, type) => {
@@ -118,7 +122,7 @@ export const chatHandler = async (socket, queueService) => {
             } else {
               socket.emit('chat:content', { content: chunk });
             }
-          }, abortController.signal, selectedModel, apiKey);
+          }, abortController.signal, selectedModel, apiKey, image);
 
           // Post-process: Check for any remaining uncompiled TikZ blocks
           // (in case they weren't caught during streaming)

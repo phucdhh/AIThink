@@ -12,21 +12,25 @@ class OllamaService {
     this.model = process.env.OLLAMA_MODEL || 'deepseek-r1:8b';
     this.commonPrompt = null;
     this.tikzPrompt = null;
+    this.visionPrompt = null;
   }
 
   async initialize() {
     try {
       const commonPath = join(__dirname, 'promptTemplates', 'common-prompt.txt');
       const tikzPath = join(__dirname, 'promptTemplates', 'tikz-prompt.txt');
+      const visionPath = join(__dirname, 'promptTemplates', 'vision-prompt.txt');
       
       this.commonPrompt = await fs.readFile(commonPath, 'utf-8');
       this.tikzPrompt = await fs.readFile(tikzPath, 'utf-8');
+      this.visionPrompt = await fs.readFile(visionPath, 'utf-8');
       
       console.log('✅ System prompts loaded successfully');
     } catch (error) {
       console.error('❌ Failed to load system prompts:', error.message);
       this.commonPrompt = 'Bạn là một trợ lý toán học chuyên nghiệp.';
       this.tikzPrompt = '';
+      this.visionPrompt = 'Bạn là trợ lý AI phân tích hình ảnh.';
     }
   }
 
@@ -43,7 +47,7 @@ class OllamaService {
     return tikzKeywords.some(keyword => lowerMessage.includes(keyword));
   }
 
-  async chat(userMessage, onStream, abortSignal, selectedModel = null, apiKey = null) {
+  async chat(userMessage, onStream, abortSignal, selectedModel = null, apiKey = null, imageData = null) {
     const modelToUse = selectedModel || this.model;
     
     // Cloud models are called through local Ollama (after ollama pull)
@@ -52,15 +56,26 @@ class OllamaService {
       console.log('☁️ Using cloud model via local Ollama');
     }
     
-    // Build system prompt: common + tikz (if needed)
-    const useTikz = this.needsTikz(userMessage);
-    const systemPrompt = useTikz 
-      ? `${this.commonPrompt}\n\n${this.tikzPrompt}`
-      : this.commonPrompt;
-    
-    if (useTikz) {
-      console.log('🎨 TikZ prompt added for visualization');
+    // Build system prompt: vision (if image) or common + tikz (if needed)
+    let systemPrompt;
+    if (imageData) {
+      systemPrompt = this.visionPrompt;
+      console.log('👁️ Vision prompt used for image analysis');
+    } else {
+      const useTikz = this.needsTikz(userMessage);
+      systemPrompt = useTikz 
+        ? `${this.commonPrompt}\n\n${this.tikzPrompt}`
+        : this.commonPrompt;
+      
+      if (useTikz) {
+        console.log('🎨 TikZ prompt added for visualization');
+      }
     }
+    
+    // Build user message
+    const userMessageContent = imageData 
+      ? { role: 'user', content: userMessage, images: [imageData] }
+      : { role: 'user', content: userMessage };
     
     try {
       const response = await axios.post(
@@ -72,10 +87,7 @@ class OllamaService {
               role: 'system',
               content: systemPrompt
             },
-            {
-              role: 'user',
-              content: userMessage
-            }
+            userMessageContent
           ],
           stream: true
         },

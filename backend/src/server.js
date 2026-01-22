@@ -36,6 +36,7 @@ const io = new Server(httpServer, {
   transports: ['polling', 'websocket'],
   pingTimeout: 60000,
   pingInterval: 25000,
+  maxHttpBufferSize: 50 * 1024 * 1024, // 50MB for image uploads
   // Add connection state recovery
   connectionStateRecovery: {
     maxDisconnectionDuration: 2 * 60 * 1000,
@@ -51,7 +52,8 @@ app.use(cors({
   origin: allowedOrigins,
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Initialize queue service with max concurrent = 8
 const queueService = new QueueService(MAX_CONCURRENT);

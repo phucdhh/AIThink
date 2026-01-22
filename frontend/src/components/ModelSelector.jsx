@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import './ModelSelector.css';
 
-const ModelSelector = ({ socket, onModelChange }) => {
+const ModelSelector = ({ socket, onModelChange, selectedModel: externalSelectedModel }) => {
   const [models, setModels] = useState([]);
   const [selectedModel, setSelectedModel] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+
+  // Sync with external selectedModel prop
+  useEffect(() => {
+    if (externalSelectedModel && externalSelectedModel !== selectedModel) {
+      setSelectedModel(externalSelectedModel);
+    }
+  }, [externalSelectedModel]);
 
   useEffect(() => {
     if (!socket) return;
