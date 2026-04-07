@@ -6,6 +6,7 @@ import ChatMessage from './ChatMessage';
 import ChatFooter from './ChatFooter';
 import Dialog from './Dialog';
 import ModelSelector from './ModelSelector';
+import * as idbService from '../services/indexedDBService';
 import '../styles/ChatInterface.css';
 
 const ChatInterface = () => {
@@ -60,66 +61,60 @@ const ChatInterface = () => {
   useEffect(() => {
     const initUser = async () => {
       try {
-        const userId = localStorage.getItem('aithink-user-id');
-        const headers = userId ? { 'x-user-id': userId } : {};
-        
-        const response = await fetch(`${getApiUrl()}/api/auth/user`, { headers });
-        const userData = await response.json();
-        
-        setUser(userData);
-        localStorage.setItem('aithink-user-id', userData.userId);
-        
-        // Load chat history
-        loadChatHistory(userData.userId);
-        
-        // Apply saved theme
-        if (userData.theme) {
-          setTheme(userData.theme);
-          document.body.setAttribute('data-theme', userData.theme);
+        let userId = localStorage.getItem('aithink-user-id');
+        if (!userId) {
+          userId = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+            .map(b => b.toString(16).padStart(2, '0')).join('');
+          localStorage.setItem('aithink-user-id', userId);
         }
+
+        const userData = {
+          userId,
+          username: localStorage.getItem('aithink-username') || `Guest_${userId.substring(0, 8)}`,
+          avatar: localStorage.getItem('aithink-avatar') || '',
+        };
+        setUser(userData);
+
+        // Apply saved theme
+        const savedTheme = localStorage.getItem('aithink-theme') || 'light';
+        setTheme(savedTheme);
+        document.body.setAttribute('data-theme', savedTheme);
+
+        // Load chat history from IndexedDB
+        await loadChatHistory();
       } catch (error) {
         console.error('Error initializing user:', error);
       }
     };
-    
+
     initUser();
   }, []);
 
-  // Load chat history
-  const loadChatHistory = async (userId) => {
+  // Load chat history from IndexedDB
+  const loadChatHistory = async () => {
     try {
-      const response = await fetch(`${getApiUrl()}/api/auth/chats`, {
-        headers: { 'x-user-id': userId }
-      });
-      const chats = await response.json();
+      const chats = await idbService.getAllChats();
       setRecentChats(chats);
     } catch (error) {
       console.error('Error loading chat history:', error);
     }
   };
 
-  // Save current chat
+  // Save current chat to IndexedDB
   const saveCurrentChat = async () => {
-    if (!user || !currentChatId || messages.length === 0) return;
-    
+    if (!currentChatId || messages.length === 0) return;
+
     try {
-      await fetch(`${getApiUrl()}/api/auth/chats`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user.userId
-        },
-        body: JSON.stringify({
-          chatId: currentChatId,
-          messages: messages.map(msg => ({
-            ...msg,
-            timestamp: msg.timestamp || new Date().toISOString()
-          }))
-        })
+      await idbService.saveChat({
+        chatId: currentChatId,
+        messages: messages.map(msg => ({
+          ...msg,
+          timestamp: msg.timestamp || new Date().toISOString()
+        }))
       });
-      
+
       // Reload chat history
-      loadChatHistory(user.userId);
+      await loadChatHistory();
     } catch (error) {
       console.error('Error saving chat:', error);
     }
@@ -297,19 +292,14 @@ const ChatInterface = () => {
     setMessages(chat.messages || []);
   };
 
-  // Handle search
+  // Handle search using IndexedDB
   const handleSearch = async (query) => {
-    if (!user || !query.trim()) {
-      loadChatHistory(user.userId);
-      return;
-    }
-    
     try {
-      const response = await fetch(
-        `${getApiUrl()}/api/auth/chats/search?query=${encodeURIComponent(query)}`,
-        { headers: { 'x-user-id': user.userId } }
-      );
-      const results = await response.json();
+      if (!query.trim()) {
+        await loadChatHistory();
+        return;
+      }
+      const results = await idbService.searchChats(query);
       setRecentChats(results);
     } catch (error) {
       console.error('Error searching chats:', error);
@@ -322,26 +312,20 @@ const ChatInterface = () => {
     window.location.reload();
   };
 
-  // Handle theme change
-  const handleThemeChange = async () => {
+  // Handle theme change (persisted in localStorage)
+  const handleThemeChange = () => {
     const newTheme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
     document.body.setAttribute('data-theme', newTheme);
-    
-    if (user) {
-      try {
-        await fetch(`${getApiUrl()}/api/auth/user/profile`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-user-id': user.userId
-          },
-          body: JSON.stringify({ theme: newTheme })
-        });
-      } catch (error) {
-        console.error('Error updating theme:', error);
-      }
-    }
+    localStorage.setItem('aithink-theme', newTheme);
+  };
+
+  // Handle profile update (name + avatar saved to localStorage)
+  const handleProfileUpdate = ({ username, avatar }) => {
+    const updated = { ...user, username, avatar };
+    setUser(updated);
+    localStorage.setItem('aithink-username', username);
+    localStorage.setItem('aithink-avatar', avatar || '');
   };
 
   // Handle submit
@@ -424,17 +408,11 @@ const ChatInterface = () => {
 
   const handleDeleteChat = async (chatId) => {
     try {
-      // Delete from backend
-      await fetch(`${getApiUrl()}/api/auth/chats/${chatId}`, {
-        method: 'DELETE',
-        headers: {
-          'x-user-id': user?.userId
-        }
-      });
-      
+      await idbService.deleteChat(chatId);
+
       // Update UI
       setRecentChats(prev => prev.filter(chat => chat.chatId !== chatId));
-      
+
       // If deleting current chat, start a new one
       if (chatId === currentChatId) {
         handleNewChat();
@@ -494,6 +472,7 @@ const ChatInterface = () => {
         onLogout={handleLogout}
         onThemeChange={handleThemeChange}
         onDeleteChat={handleDeleteChat}
+        onProfileUpdate={handleProfileUpdate}
       />
       
       <div className="main-content">
