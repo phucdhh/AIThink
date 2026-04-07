@@ -1,5 +1,6 @@
 import ollamaService from '../services/ollamaService.js';
 import tikzService from '../services/tikzService.js';
+import axios from 'axios';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -14,6 +15,96 @@ try {
 } catch (err) {
   console.error('Failed to load ai.conf:', err.message);
   aiConfig = { defaultModel: 'deepseek-r1:8b', models: [] };
+}
+
+// Helper function to call Cerebras API (OpenAI-compatible)
+async function callCerebrasAPI(model, systemPrompt, userMessage, onStream, abortSignal) {
+  const endpoint = 'https://api.cerebras.ai/v1/chat/completions';
+  
+  try {
+    const response = await axios.post(
+      endpoint,
+      {
+        model: model,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userMessage }
+        ],
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 4096
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${aiConfig.cerebrasApiKey}`,
+          'Content-Type': 'application/json'
+        },
+        responseType: 'stream',
+        signal: abortSignal
+      }
+    );
+
+    return new Promise((resolve, reject) => {
+      let fullResponse = '';
+      let stopped = false;
+
+      if (abortSignal) {
+        abortSignal.addEventListener('abort', () => {
+          stopped = true;
+          response.data.destroy();
+          reject(new Error('Request aborted by user'));
+        });
+      }
+
+      response.data.on('data', (chunk) => {
+        if (stopped) return;
+
+        const lines = chunk.toString().split('\n').filter(line => line.trim() && line.startsWith('data: '));
+        
+        for (const line of lines) {
+          if (stopped) break;
+          
+          const data = line.replace('data: ', '').trim();
+          if (data === '[DONE]') {
+            resolve(fullResponse);
+            return;
+          }
+
+          try {
+            const json = JSON.parse(data);
+            const content = json.choices?.[0]?.delta?.content;
+            
+            if (content) {
+              fullResponse += content;
+              if (onStream && !stopped) {
+                onStream(content, 'content');
+              }
+            }
+          } catch (e) {
+            // Ignore parsing errors
+          }
+        }
+      });
+
+      response.data.on('error', (error) => {
+        if (!stopped) {
+          reject(error);
+        }
+      });
+
+      response.data.on('end', () => {
+        if (!stopped) {
+          resolve(fullResponse);
+        }
+      });
+    });
+  } catch (error) {
+    if (error.code === 'ERR_CANCELED' || error.message.includes('aborted')) {
+      throw new Error('Request aborted by user');
+    }
+    console.error('❌ Cerebras API error:', error.response?.data || error.message);
+    throw new Error('Failed to communicate with Cerebras AI');
+  }
 }
 
 // Track active requests per socket to ensure cleanup
@@ -56,15 +147,17 @@ export const chatHandler = async (socket, queueService) => {
         // If image is provided, force qwen3-vl:235b-cloud
         const selectedModel = image ? 'qwen3-vl:235b-cloud' : (model || aiConfig.defaultModel);
         const selectedModelInfo = aiConfig.models.find(m => m.id === selectedModel);
-        const apiKey = selectedModelInfo?.type === 'cloud' ? aiConfig.apiKey : null;
+        const modelType = selectedModelInfo?.type || 'local';
+        const apiKey = modelType === 'cloud' ? aiConfig.apiKey : null;
         
-        console.log(`🤖 Using model: ${selectedModel} (${selectedModelInfo?.type || 'local'})`);
+        console.log(`🤖 Using model: ${selectedModel} (${modelType})`);
         if (image) {
           console.log('📷 Image attached, using vision model');
         }
 
         try {
-          await ollamaService.chat(message, async (chunk, type) => {
+          // Define streaming callback (same for both Cerebras and Ollama)
+          const streamCallback = async (chunk, type) => {
             // Check if aborted
             if (abortController?.signal.aborted) {
               throw new Error('Request aborted by user');
@@ -122,7 +215,26 @@ export const chatHandler = async (socket, queueService) => {
             } else {
               socket.emit('chat:content', { content: chunk });
             }
-          }, abortController.signal, selectedModel, apiKey, image);
+          };
+          
+          // Use Cerebras API for cerebras models, Ollama for others
+          if (modelType === 'cerebras' && !image) {
+            console.log('☁️ Using Cerebras API');
+            // Build system prompt
+            const useTikz = ollamaService.needsTikz(message);
+            const systemPrompt = useTikz 
+              ? `${ollamaService.commonPrompt}\n\n${ollamaService.tikzPrompt}`
+              : ollamaService.commonPrompt;
+            
+            if (useTikz) {
+              console.log('🎨 TikZ prompt added for visualization');
+            }
+            
+            await callCerebrasAPI(selectedModel, systemPrompt, message, streamCallback, abortController.signal);
+          } else {
+            // Use Ollama for local, cloud, and vision models
+            await ollamaService.chat(message, streamCallback, abortController.signal, selectedModel, apiKey, image);
+          }
 
           // Post-process: Check for any remaining uncompiled TikZ blocks
           // (in case they weren't caught during streaming)

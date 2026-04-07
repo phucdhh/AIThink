@@ -4,6 +4,7 @@ module.exports = {
       name: 'aithink-backend',
       cwd: '/Users/mac/AIThink/backend',
       script: 'src/server.js',
+      exec_mode: 'fork',
       instances: 1,
       autorestart: true,
       watch: false,
@@ -33,6 +34,19 @@ module.exports = {
       },
       error_file: '/Users/mac/AIThink/logs/frontend-error.log',
       out_file: '/Users/mac/AIThink/logs/frontend-out.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true
+    },
+    {
+      name: 'aithink-tunnel',
+      script: 'cloudflared',
+      args: 'tunnel --config /Users/mac/.cloudflared/config-aithink.yml run',
+      instances: 1,
+      autorestart: true,
+      watch: false,
+      max_memory_restart: '100M',
+      error_file: '/Users/mac/AIThink/logs/tunnel-error.log',
+      out_file: '/Users/mac/AIThink/logs/tunnel-out.log',
       log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
       merge_logs: true
     }
